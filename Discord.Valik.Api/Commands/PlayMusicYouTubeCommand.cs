@@ -1,6 +1,7 @@
-using System.Collections.Concurrent;
+using Discord.Valik.Api.Commands.Music;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext;
 using FFMpegCore;
 using FFMpegCore.Enums;
@@ -10,59 +11,45 @@ using YoutubeExplode.Videos.Streams;
 
 namespace Discord.Valik.Api.Commands;
 
-public class QueuedTrack
-{
-    public string Url { get; init; }
-}
-
 public class PlayMusicYouTubeCommand : BaseCommandModule
 {
     private YoutubeClient _youtubeClient;
-    
-    private static readonly ConcurrentDictionary<ulong, ConcurrentQueue<QueuedTrack>> _playQueue = new();
-    
-    private static readonly ConcurrentBag<ulong> _currentGuilds = [];
-    private static readonly ConcurrentDictionary<ulong, bool> _currentPlayingGuilds = [];
-    private static readonly ConcurrentDictionary<ulong, CancellationTokenSource> _cancellationTokenSources = new();
 
     [Command("play")]
     public async Task AddInQueue(CommandContext ctx, [RemainingText] string playUrl)
     {
-        if (!_playQueue.ContainsKey(ctx.Guild.Id))
+        var channel = GetVoiceChannel(ctx.Member);
+
+        if (channel is null)
         {
-            _playQueue.TryAdd(ctx.Guild.Id, new ConcurrentQueue<QueuedTrack>());
+            await ctx.Channel.SendMessageAsync($"В канал зайд иидиот");
+            return;
         }
         
-        _playQueue[ctx.Guild.Id].Enqueue(new QueuedTrack
-        {
-            Url = playUrl
-        });
-
+        var trackQueue = TrackQueuePool.GetTrackQueue(ctx.Guild.Id);
+        trackQueue.Enqueue(playUrl);
+        
         await ctx.Channel.SendMessageAsync("Добавляем в очередь!");
-
-        if (!_currentPlayingGuilds.ContainsKey(ctx.Guild.Id) || !_currentPlayingGuilds[ctx.Guild.Id])
+        
+        if (!trackQueue.IsPlaying)
         {
-            await ctx.Channel.SendMessageAsync("Нет треков в очереди");
-            await PlayNextInQueue(ctx);
-        }
-        else
-        {
-            await ctx.Channel.SendMessageAsync("Есть треки в очереди не играем ((");
+            await PlayNextInQueue(trackQueue, channel, ctx.Client.GetVoiceNext());
         }
     }
 
     [Command("queue")]
-    public async Task Getqueue(CommandContext ctx)
+    public async Task GetQueue(CommandContext ctx)
     {
-        if (!_playQueue.ContainsKey(ctx.Guild.Id))
+        var trackQueue = TrackQueuePool.GetTrackQueue(ctx.Guild.Id);
+        if (!trackQueue.Any())
         {
-            await ctx.Channel.SendMessageAsync($"Нет треков!");
+            await ctx.Channel.SendMessageAsync("Нет треков!");
             return;
         }
 
-        await ctx.Channel.SendMessageAsync($"Треки");
+        await ctx.Channel.SendMessageAsync("Треки");
         var index = 1;
-        foreach (var item in _playQueue[ctx.Guild.Id])
+        foreach (var item in trackQueue.GetAll())
         {
             await ctx.Channel.SendMessageAsync($"{index++} - {item}");
         }
@@ -71,71 +58,51 @@ public class PlayMusicYouTubeCommand : BaseCommandModule
     [Command("skip")]
     public async Task Skip(CommandContext ctx)
     {
-        if (!_cancellationTokenSources.TryGetValue(ctx.Guild.Id, out var source))
+        var trackQueue = TrackQueuePool.GetTrackQueue(ctx.Guild.Id);
+
+        if (!trackQueue.Any())
         {
             await ctx.Channel.SendMessageAsync($"Нет треков");
             return;
         }
         
-        await source.CancelAsync();
-        _currentPlayingGuilds.TryRemove(ctx.Guild.Id, out _);
-        _cancellationTokenSources.TryRemove(ctx.Guild.Id, out _);
+        await trackQueue.SkipAsync();
+    }
+
+    private DiscordChannel? GetVoiceChannel(DiscordMember? member)
+    {
+        return member?.VoiceState?.Channel;
     }
     
-    private async Task PlayNextInQueue(CommandContext ctx)
+    private async Task PlayNextInQueue(TrackQueue trackQueue, DiscordChannel voiceChannel, VoiceNextExtension voice)
     {
-        if (_playQueue[ctx.Guild.Id].TryDequeue(out var queuedTrack))
+        if (trackQueue.TryDequeue(out var url))
         {
-            _cancellationTokenSources.TryAdd(ctx.Guild.Id, new CancellationTokenSource());
-            _currentPlayingGuilds.TryAdd(ctx.Guild.Id, true);
-            var voiceChannel  = ctx.Member?.VoiceState?.Channel;
+            trackQueue.IsPlaying = true;
             
-            if (voiceChannel == null)
-            {
-                await ctx.Channel.SendMessageAsync("Ты в канал готововой зайди, гений");
-                return;
-            }
-            
-            var voice = ctx.Client.GetVoiceNext();
-        
-            var guild = ctx.Guild;
-            
-            VoiceNextConnection connection;
-            if (_currentGuilds.Contains(guild.Id))
-            {
-                connection = voice.GetConnection(guild);    
-            }
-            else
-            {
-                _currentGuilds.Add(guild.Id);
-                connection = await voice.ConnectAsync(voiceChannel);
-            }
+            var connection = voice.GetConnection(voiceChannel.Guild) ?? await voice.ConnectAsync(voiceChannel);
 
-            var cancellationToken = _cancellationTokenSources[ctx.Guild.Id].Token;
             var transmit = connection.GetTransmitSink();
-
-            _youtubeClient = new YoutubeClient();
 
             try
             {
-                await using var audio = await GetAudioStreamAsync(queuedTrack.Url, cancellationToken);
-                await StreamAudioFileAsync(audio, transmit, cancellationToken);
+                _youtubeClient = new YoutubeClient();
+                await using var audio = await GetAudioStreamAsync(url!, trackQueue.CancellationToken);
+                await StreamAudioFileAsync(audio, transmit, trackQueue.CancellationToken);
             }
             finally
             {
+                trackQueue.IsPlaying = false;
                 await transmit.FlushAsync();
-                _currentPlayingGuilds.TryAdd(ctx.Guild.Id, false);
                 
-                await PlayNextInQueue(ctx);
-            } 
-            
+                await PlayNextInQueue(trackQueue, voiceChannel, voice);
+            }
         }
     }
     
     private async Task<Stream> GetAudioStreamAsync(string url, CancellationToken cancellationToken = default)
     {
         var streamManifest = await _youtubeClient.Videos.Streams.GetManifestAsync(url, cancellationToken);
-
         var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
         
         var audioStream = await _youtubeClient.Videos.Streams.GetAsync(audioStreamInfo, cancellationToken);

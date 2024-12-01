@@ -1,9 +1,9 @@
 using Discord.Valik.Api.Commands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Builders;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.VoiceNext;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Discord.Valik.Api;
 
@@ -13,7 +13,7 @@ public class BotClient
     private readonly CommandsNextExtension _commandsNext;
     private readonly BotSettings _settings;
 
-    public BotClient(BotSettings settings)
+    public BotClient(ServiceProvider services, BotSettings settings)
     {
         _settings = settings;
 
@@ -24,7 +24,7 @@ public class BotClient
             AutoReconnect = true,
             Intents = DiscordIntents.All
         };
-        
+
         _discordClient = new DiscordClient(config);
 
         var commandsConfig = new CommandsNextConfiguration
@@ -32,7 +32,8 @@ public class BotClient
             StringPrefixes = [_settings.Prefix],
             EnableMentionPrefix = true,
             EnableDms = false,
-            EnableDefaultHelp = false
+            EnableDefaultHelp = false,
+            Services = services
         };
 
         var slashConfig = _discordClient.UseSlashCommands();
@@ -42,11 +43,11 @@ public class BotClient
         {
             EnableIncoming = false
         });
-        
+
         _commandsNext = _discordClient.UseCommandsNext(commandsConfig);
         _commandsNext.RegisterCommands(typeof(Program).Assembly);
     }
-    
+
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         await _discordClient.ConnectAsync();

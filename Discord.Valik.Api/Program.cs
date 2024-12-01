@@ -1,14 +1,15 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using Discord.Valik.Api;
-using Discord.Valik.Api.Commands;
+﻿using Discord.Valik.Api;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+var services = new ServiceCollection()
+    .BuildServiceProvider();
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
 
-var client = new BotClient(new BotSettings
+var client = new BotClient(services, new BotSettings
 {
     Token = configuration["BotConfig:Token"],
     Prefix = configuration["BotConfig:Prefix"],
