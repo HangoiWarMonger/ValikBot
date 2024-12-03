@@ -25,12 +25,12 @@ public class PlayMusicYouTubeCommand : BaseCommandModule
             await ctx.Channel.SendMessageAsync($"В канал зайд иидиот");
             return;
         }
-        
+
         var trackQueue = TrackQueuePool.GetTrackQueue(ctx.Guild.Id);
         trackQueue.Enqueue(playUrl);
-        
+
         await ctx.Channel.SendMessageAsync("Добавляем в очередь!");
-        
+
         if (!trackQueue.IsPlaying)
         {
             await PlayNextInQueue(trackQueue, channel, ctx.Client.GetVoiceNext());
@@ -65,7 +65,7 @@ public class PlayMusicYouTubeCommand : BaseCommandModule
             await ctx.Channel.SendMessageAsync($"Нет треков");
             return;
         }
-        
+
         await trackQueue.SkipAsync();
     }
 
@@ -73,13 +73,13 @@ public class PlayMusicYouTubeCommand : BaseCommandModule
     {
         return member?.VoiceState?.Channel;
     }
-    
+
     private async Task PlayNextInQueue(TrackQueue trackQueue, DiscordChannel voiceChannel, VoiceNextExtension voice)
     {
         if (trackQueue.TryDequeue(out var url))
         {
             trackQueue.IsPlaying = true;
-            
+
             var connection = voice.GetConnection(voiceChannel.Guild) ?? await voice.ConnectAsync(voiceChannel);
 
             var transmit = connection.GetTransmitSink();
@@ -94,26 +94,26 @@ public class PlayMusicYouTubeCommand : BaseCommandModule
             {
                 trackQueue.IsPlaying = false;
                 await transmit.FlushAsync();
-                
+
                 await PlayNextInQueue(trackQueue, voiceChannel, voice);
             }
         }
     }
-    
+
     private async Task<Stream> GetAudioStreamAsync(string url, CancellationToken cancellationToken = default)
     {
         var streamManifest = await _youtubeClient.Videos.Streams.GetManifestAsync(url, cancellationToken);
         var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
-        
+
         var audioStream = await _youtubeClient.Videos.Streams.GetAsync(audioStreamInfo, cancellationToken);
-        
+
         return audioStream;
     }
-    
+
     private async Task StreamAudioFileAsync(Stream audioStream, VoiceTransmitSink transmitSink, CancellationToken cancellationToken = default)
     {
         await FFMpegArguments.FromPipeInput(new StreamPipeSource(audioStream))
-            .OutputToPipe(new StreamPipeSink((stream, _ ) => stream.CopyToAsync(transmitSink, cancellationToken: cancellationToken)), options => options
+            .OutputToPipe(new StreamPipeSink((stream, _) => stream.CopyToAsync(transmitSink, cancellationToken: cancellationToken)), options => options
                 .WithAudioBitrate(AudioQuality.Normal)
                 .WithCustomArgument("-ar 48000")
                 .ForceFormat("wav"))

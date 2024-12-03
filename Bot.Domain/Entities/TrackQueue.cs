@@ -1,28 +1,28 @@
 using System.Collections.Concurrent;
 
-namespace Discord.Valik.Api.Commands.Music;
+namespace Bot.Domain.Entities;
 
-public class TrackQueue
+public class TrackQueue : BaseEntity<TrackQueue>
 {
-    private readonly ConcurrentQueue<string> _playingQueue;
+    private readonly ConcurrentQueue<MusicTrack> _playingQueue;
     private CancellationTokenSource _cancellationTokenSource;
-    private string? _currentSong;
+    private MusicTrack? _currentSong;
 
     public bool IsPlaying { get; set; }
     public CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
     public TrackQueue()
     {
-        _playingQueue = new ConcurrentQueue<string>();
+        _playingQueue = new ConcurrentQueue<MusicTrack>();
         _cancellationTokenSource = new CancellationTokenSource();
     }
 
-    public void Enqueue(string track)
+    public void Enqueue(MusicTrack track)
     {
         _playingQueue.Enqueue(track);
     }
 
-    public bool TryDequeue(out string? track)
+    public bool TryDequeue(out MusicTrack? track)
     {
         var hasTrack = _playingQueue.TryDequeue(out var internalTrack);
 
@@ -42,7 +42,7 @@ public class TrackQueue
         return !_playingQueue.IsEmpty || _currentSong != null;
     }
 
-    public IEnumerable<string> GetAll()
+    public IEnumerable<MusicTrack> GetAll()
     {
         yield return _currentSong!;
 

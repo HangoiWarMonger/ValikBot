@@ -48,13 +48,10 @@ public class BotClient
         _commandsNext.RegisterCommands(typeof(Program).Assembly);
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken = default)
+    public async Task StartAsync()
     {
         await _discordClient.ConnectAsync();
 
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
-        }
+        await Task.Delay(-1);
     }
 }

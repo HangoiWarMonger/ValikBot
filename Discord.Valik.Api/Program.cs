@@ -1,8 +1,12 @@
 ﻿using Discord.Valik.Api;
+using Discord.Valik.Api.Commands.Music;
+using Discord.Valik.Api.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 var services = new ServiceCollection()
+    .AddSingleton(typeof(IDiscordGuildScopedService<TrackQueue>), typeof(DiscordGuildScopedService<TrackQueue>))
+    .AddScoped<TrackQueue>()
     .BuildServiceProvider();
 
 var configuration = new ConfigurationBuilder()
