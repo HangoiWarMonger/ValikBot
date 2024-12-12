@@ -1,32 +1,33 @@
+using Ardalis.GuardClauses;
 using Bot.Application.Common.Dto;
 using Bot.Application.Common.Interfaces;
 using Bot.Application.Common.Types;
-using Bot.Application.Music.Commands.YouTube.GetTrackInfoRequest;
 using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.GetTrackInfo;
 
 public class GetTrackInfoRequestResolver : IRequestHandler<GetTrackInfoRequest, TrackInfoDto>
 {
+    private readonly IFactory<ITrackClient, TrackSource> _trackClientFactory;
     private readonly ITrackSourceResolver _trackSourceResolver;
-    private readonly ISender _sender;
 
-    public GetTrackInfoRequestResolver(ITrackSourceResolver trackSourceResolver, ISender sender)
+    public GetTrackInfoRequestResolver(ITrackSourceResolver trackSourceResolver, IFactory<ITrackClient, TrackSource> trackClientFactory)
     {
         _trackSourceResolver = trackSourceResolver;
-        _sender = sender;
+        _trackClientFactory = trackClientFactory;
     }
 
-    public Task<TrackInfoDto> Handle(GetTrackInfoRequest request, CancellationToken cancellationToken)
+    public async Task<TrackInfoDto> Handle(GetTrackInfoRequest request, CancellationToken cancellationToken)
     {
+        Guard.Against.Null(request, nameof(GetTrackInfoRequest));
+        Guard.Against.NullOrWhiteSpace(request.Url, nameof(GetTrackInfoRequest.Url));
+
         var source = _trackSourceResolver.GetTrackSource(request.Url);
 
-        var command = source switch
-        {
-            TrackSource.Youtube => new GetYouTubeTrackInfoRequest(request.Url),
-            TrackSource.Undefined or _ => throw new InvalidDataException(),
-        };
+        ITrackClient trackClient = _trackClientFactory.Get(source);
 
-        return _sender.Send(command, cancellationToken);
+        var info = await trackClient.GetInfoAsync(request.Url);
+
+        return info;
     }
 }

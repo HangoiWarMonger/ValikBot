@@ -6,6 +6,9 @@ using FFMpegCore.Pipes;
 
 namespace Bot.Infrastructure.Ffmpeg;
 
+/// <summary>
+/// FFMPEG ковертер аудио в PCM формат.
+/// </summary>
 public class FfmpegPcmAudionConverter : IPcmAudioConverter
 {
     /// <summary>
@@ -16,8 +19,8 @@ public class FfmpegPcmAudionConverter : IPcmAudioConverter
     /// <param name="cancellationToken">Токен для отмены операции.</param>
     public async Task ConvertAndStreamAsync(Stream audioStream, Func<Stream, Task> reStreamAction, CancellationToken cancellationToken = default)
     {
-        Guard.Against.Null(audioStream, nameof(audioStream));
-        Guard.Against.Null(reStreamAction, nameof(reStreamAction));
+        Guard.Against.Null(audioStream);
+        Guard.Against.Null(reStreamAction);
 
         await FFMpegArguments.FromPipeInput(new StreamPipeSource(audioStream))
             .OutputToPipe(new StreamPipeSink((stream, _) => reStreamAction(stream)), options => options

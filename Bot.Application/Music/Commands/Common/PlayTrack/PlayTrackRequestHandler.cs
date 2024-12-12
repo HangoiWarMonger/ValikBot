@@ -1,3 +1,4 @@
+using Ardalis.GuardClauses;
 using Bot.Application.Common.Interfaces;
 using Bot.Application.Music.Commands.Common.ConvertAudionToPcmAndStream;
 using Bot.Application.Music.Commands.Common.GetAudioStream;
@@ -20,6 +21,9 @@ public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
 
     public async Task Handle(PlayTrackRequest request, CancellationToken cancellationToken)
     {
+        Guard.Against.Null(request.RestreamAction, nameof(request.RestreamAction));
+        Guard.Against.Default(request.GuildId, nameof(request.GuildId));
+
         _trackQueue = _trackQueueFactory.Get(request.GuildId);
 
         if (!_trackQueue.IsPlaying)

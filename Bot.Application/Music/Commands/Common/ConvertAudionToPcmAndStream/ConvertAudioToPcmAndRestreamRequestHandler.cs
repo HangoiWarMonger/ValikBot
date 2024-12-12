@@ -24,7 +24,9 @@ public class ConvertAudioToPcmAndRestreamRequestHandler : IRequestHandler<Conver
     /// </summary>
     public Task Handle(ConvertAudioToPcmAndRestreamRequest request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request, nameof(request));
+        Guard.Against.Null(request, nameof(ConvertAudioToPcmAndRestreamRequest));
+        Guard.Against.Null(request.AudioStream, nameof(request.AudioStream));
+        Guard.Against.Null(request.ReStreamAction, nameof(request.ReStreamAction));
 
         return _pcmAudioConverter.ConvertAndStreamAsync(request.AudioStream, request.ReStreamAction, cancellationToken);
     }

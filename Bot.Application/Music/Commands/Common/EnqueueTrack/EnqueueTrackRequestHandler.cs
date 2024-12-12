@@ -17,7 +17,9 @@ public class EnqueueTrackRequestHandler : IRequestHandler<EnqueueTrackRequest>
 
     public Task Handle(EnqueueTrackRequest request, CancellationToken cancellationToken)
     {
-        Guard.Against.Null(request, nameof(request));
+        Guard.Against.Null(request, nameof(EnqueueTrackRequest));
+        Guard.Against.NullOrWhiteSpace(request.Url, nameof(request.Url));
+        Guard.Against.Default(request.GuildId, nameof(request.GuildId));
 
         _trackQueue = _trackQueueFactory.Get(request.GuildId);
 

@@ -1,6 +1,9 @@
+using Ardalis.GuardClauses;
 using Bot.Application.Common.Dto;
 using Bot.Application.Common.Interfaces;
+using Bot.Domain.Validation;
 using YoutubeExplode;
+using YoutubeExplode.Common;
 using YoutubeExplode.Videos.Streams;
 
 namespace Bot.Infrastructure.YouTube;
@@ -19,6 +22,8 @@ public class YouTubeTrackClient : ITrackClient
     /// <param name="cancellationToken">Токен отмены операции.</param>
     public async Task<Stream> GetAudioStreamAsync(string videoUrl, CancellationToken cancellationToken = default)
     {
+        Guard.Against.NullOrWhiteSpace(videoUrl);
+
         var streamManifest = await _youtubeClient.Videos.Streams.GetManifestAsync(videoUrl, cancellationToken);
         var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
 
@@ -34,6 +39,8 @@ public class YouTubeTrackClient : ITrackClient
     /// <returns>Информация о треке.</returns>
     public async Task<TrackInfoDto> GetInfoAsync(string url)
     {
+        Guard.Against.NullOrWhiteSpace(url);
+
         var video = await _youtubeClient.Videos.GetAsync(url);
 
         return new TrackInfoDto
@@ -43,5 +50,21 @@ public class YouTubeTrackClient : ITrackClient
             Duration = video.Duration,
             ThumbnailUrl = video.Thumbnails[0].Url,
         };
+    }
+
+    /// <summary>
+    /// Поиск ссылки на трек по запросу.
+    /// </summary>
+    /// <param name="request">Запрос.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Ссылка на трек.</returns>
+    public async Task<string?> SearchTrackUrlAsync(string request, CancellationToken cancellationToken = default)
+    {
+        var videos = await _youtubeClient.Search.GetVideosAsync(request, cancellationToken);
+
+        var video = videos.FirstOrDefault();
+        ThrowIf.Null(video, nameof(video));
+
+        return video!.Url;
     }
 }

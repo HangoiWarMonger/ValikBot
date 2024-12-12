@@ -10,7 +10,7 @@ public partial class TrackSourceResolver : ITrackSourceResolver
 {
     public TrackSource GetTrackSource(string url)
     {
-        Guard.Against.NullOrWhiteSpace(url, nameof(url));
+        Guard.Against.NullOrWhiteSpace(url);
 
         if (YoutubeVideoUrlRegex().IsMatch(url))
         {

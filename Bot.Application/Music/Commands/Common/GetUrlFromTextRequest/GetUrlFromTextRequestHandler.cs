@@ -1,0 +1,34 @@
+using Ardalis.GuardClauses;
+using Bot.Application.Common.Interfaces;
+using Bot.Domain.Validation;
+using MediatR;
+
+namespace Bot.Application.Music.Commands.Common.GetUrlFromTextRequest;
+
+public class GetUrlFromTextRequestHandler : IRequestHandler<GetUrlFromTextRequest, string>
+{
+    private readonly ITrackClient _trackClient;
+
+    public GetUrlFromTextRequestHandler(ITrackClient trackClient)
+    {
+        _trackClient = trackClient;
+    }
+
+    public async Task<string> Handle(GetUrlFromTextRequest request, CancellationToken cancellationToken)
+    {
+        Guard.Against.Null(request, nameof(request));
+        Guard.Against.NullOrWhiteSpace(request.RequestText, nameof(request.RequestText));
+
+        Uri.TryCreate(request.RequestText, UriKind.Absolute, out Uri? uriResult);
+
+        if (uriResult?.Scheme == Uri.UriSchemeHttp || uriResult?.Scheme == Uri.UriSchemeHttps)
+        {
+            return request.RequestText;
+        }
+
+        var result = await _trackClient.SearchTrackUrlAsync(request.RequestText, cancellationToken);
+        ThrowIf.NullOrWhiteSpace(result, nameof(result));
+
+        return result!;
+    }
+}

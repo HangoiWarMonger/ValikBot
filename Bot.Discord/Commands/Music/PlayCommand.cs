@@ -1,6 +1,7 @@
 using Bot.Application.Common.Dto;
 using Bot.Application.Music.Commands.Common.EnqueueTrack;
 using Bot.Application.Music.Commands.Common.GetTrackInfo;
+using Bot.Application.Music.Commands.Common.GetUrlFromTextRequest;
 using Bot.Application.Music.Commands.Common.PlayTrack;
 using Bot.Discord.Common.Graphics.Embed;
 using DSharpPlus.CommandsNext;
@@ -22,22 +23,25 @@ public class PlayCommand : BaseCommandModule
     }
 
     [Command("play")]
-    public async Task AddInQueue(CommandContext ctx, [RemainingText] string playUrl)
+    public async Task AddInQueue(CommandContext ctx, [RemainingText] string request)
     {
         var voiceChannel = GetVoiceChannel(ctx.Member);
 
         if (voiceChannel is null)
         {
-            await ctx.Channel.SendMessageAsync($"В канал зайд иидиот");
+            await ctx.Channel.SendMessageAsync($"В канал зайди идиот");
             return;
         }
 
-        var getTrackInfoRequest = new GetTrackInfoRequest(playUrl);
+        var getUrlRequest = new GetUrlFromTextRequest(request);
+        var url = await _sender.Send(getUrlRequest);
+
+        var getTrackInfoRequest = new GetTrackInfoRequest(url);
         TrackInfoDto trackInfo = await _sender.Send(getTrackInfoRequest);
 
         await ctx.Channel.SendMessageAsync(MusicEmbed.TrackEmbed(trackInfo, ctx.Member!));
 
-        var enqueueTrack = new EnqueueTrackRequest(playUrl, ctx.Guild.Id);
+        var enqueueTrack = new EnqueueTrackRequest(url, ctx.Guild.Id);
         await _sender.Send(enqueueTrack);
 
         var voice = ctx.Client.GetVoiceNext();
@@ -48,7 +52,7 @@ public class PlayCommand : BaseCommandModule
         await _sender.Send(
             new PlayTrackRequest(
                 guildId: ctx.Guild.Id,
-                restreamAction: (stream) => stream.CopyToAsync(transmit),
+                restreamAction: stream => stream.CopyToAsync(transmit),
                 endStreamAction: transmit.FlushAsync()));
     }
 

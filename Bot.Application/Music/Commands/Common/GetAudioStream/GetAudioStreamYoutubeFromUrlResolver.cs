@@ -1,31 +1,30 @@
+using Ardalis.GuardClauses;
 using Bot.Application.Common.Interfaces;
 using Bot.Application.Common.Types;
-using Bot.Application.Music.Commands.YouTube.GetAudioStream;
 using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.GetAudioStream;
 
 public class GetAudioStreamYoutubeFromUrlResolver : IRequestHandler<GetAudioStreamRequest, Stream>
 {
+    private readonly IFactory<ITrackClient, TrackSource> _trackClientFactory;
     private readonly ITrackSourceResolver _trackSourceResolver;
-    private readonly ISender _sender;
 
-    public GetAudioStreamYoutubeFromUrlResolver(ITrackSourceResolver trackSourceResolver, ISender sender)
+    public GetAudioStreamYoutubeFromUrlResolver(ITrackSourceResolver trackSourceResolver, IFactory<ITrackClient, TrackSource> trackClientFactory)
     {
         _trackSourceResolver = trackSourceResolver;
-        _sender = sender;
+        _trackClientFactory = trackClientFactory;
     }
 
     public Task<Stream> Handle(GetAudioStreamRequest request, CancellationToken cancellationToken)
     {
+        Guard.Against.Null(request, nameof(request));
+        Guard.Against.NullOrWhiteSpace(request.Url, nameof(request.Url));
+
         var source = _trackSourceResolver.GetTrackSource(request.Url);
 
-        var command = source switch
-        {
-            TrackSource.Youtube => new GetAudioStreamYoutubeFromUrlRequest(request.Url),
-            TrackSource.Undefined or _ => throw new InvalidDataException(),
-        };
+        ITrackClient trackClient = _trackClientFactory.Get(source);
 
-        return _sender.Send(command, cancellationToken);
+        return trackClient.GetAudioStreamAsync(request.Url, cancellationToken);
     }
 }

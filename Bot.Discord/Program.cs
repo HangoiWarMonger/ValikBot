@@ -1,4 +1,5 @@
 ﻿using Bot.Application.Common.Interfaces;
+using Bot.Application.Common.Services;
 using Bot.Discord.Common;
 using Bot.Discord.Common.Bot;
 using Bot.Discord.Common.DependencyInjection;
@@ -17,6 +18,11 @@ await Host.CreateDefaultBuilder()
 
         services
             .AddSingleton<ITest, Test>()
+            .AddTransient<ITrackSourceResolver, TrackSourceResolver>()
+            .AddMediatR(x =>
+            {
+                x.RegisterServicesFromAssembly(Bot.Application.AssemblyReference.Assembly);
+            })
             .AddSingleton(typeof(IFactory<TrackQueue, ulong>), typeof(GuildTrackQueueFactory))
             .AddTransient<ITrackClient, YouTubeTrackClient>()
             .AddHostedService<BotService>();
