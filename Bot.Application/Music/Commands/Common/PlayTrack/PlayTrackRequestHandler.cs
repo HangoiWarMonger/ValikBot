@@ -1,6 +1,5 @@
 using Ardalis.GuardClauses;
 using Bot.Application.Common.Interfaces;
-using Bot.Application.Music.Commands.Common.ConvertAudionToPcmAndStream;
 using Bot.Application.Music.Commands.Common.GetAudioStream;
 using Bot.Domain.Entities;
 using MediatR;
@@ -10,13 +9,15 @@ namespace Bot.Application.Music.Commands.Common.PlayTrack;
 public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
 {
     private readonly IFactory<TrackQueue, ulong> _trackQueueFactory;
-    private ISender _sender;
+    private readonly IPcmAudioConverter _pcmAudioConverter;
+    private readonly ISender _sender;
     private TrackQueue _trackQueue;
 
-    public PlayTrackRequestHandler(IFactory<TrackQueue, ulong> trackQueueFactory, ISender sender)
+    public PlayTrackRequestHandler(IFactory<TrackQueue, ulong> trackQueueFactory, ISender sender, IPcmAudioConverter pcmAudioConverter)
     {
         _trackQueueFactory = trackQueueFactory;
         _sender = sender;
+        _pcmAudioConverter = pcmAudioConverter;
     }
 
     public async Task Handle(PlayTrackRequest request, CancellationToken cancellationToken)
@@ -32,7 +33,7 @@ public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
         }
     }
 
-    private async Task PlayNextInQueue(Func<Stream, Task> restreamAction, Task endStreamAction)
+    private async Task PlayNextInQueue(Func<Stream, CancellationToken, Task> restreamAction, Task endStreamAction)
     {
         if (_trackQueue.TryDequeue(out var track))
         {
@@ -40,10 +41,9 @@ public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
 
             try
             {
-                var audioStream = await _sender.Send(new GetAudioStreamRequest(track!.Link.Url));
+                await using var audioStream = await _sender.Send(new GetAudioStreamRequest(track!.Link.Url), _trackQueue.CancellationToken);
 
-                var convertAndStreamRequest = new ConvertAudioToPcmAndRestreamRequest(audioStream, restreamAction);
-                await _sender.Send(convertAndStreamRequest);
+                await _pcmAudioConverter.ConvertAndStreamAsync(audioStream, restreamAction, _trackQueue.CancellationToken);
             }
             finally
             {

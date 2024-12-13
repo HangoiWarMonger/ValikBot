@@ -16,7 +16,7 @@ public class MusicTrack : BaseEntity<MusicTrack>
     /// Музыкальный трек.
     /// </summary>
     /// <param name="url">Ссылка на трек.</param>
-    public MusicTrack(string url)
+    public MusicTrack(string url) : base(Guid.NewGuid())
     {
         Link = new TrackLink(url);
     }

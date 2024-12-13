@@ -7,7 +7,7 @@ public class PlayTrackRequest : IRequest
     /// <summary>
     /// Функция рестриминга аудио потока.
     /// </summary>
-    public Func<Stream, Task> RestreamAction { get; init; }
+    public Func<Stream, CancellationToken, Task> RestreamAction { get; init; }
 
     /// <summary>
     /// Функция по завершению стриминга.
@@ -19,7 +19,7 @@ public class PlayTrackRequest : IRequest
     /// </summary>
     public ulong GuildId { get; set; }
 
-    public PlayTrackRequest(Func<Stream, Task> restreamAction, Task endStreamAction, ulong guildId)
+    public PlayTrackRequest( Func<Stream, CancellationToken, Task> restreamAction, Task endStreamAction, ulong guildId)
     {
         RestreamAction = restreamAction;
         EndStreamAction = endStreamAction;

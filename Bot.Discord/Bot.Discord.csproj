@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Bot.Application\Bot.Application.csproj" />
+      <ProjectReference Include="..\Bot.Infrastructure.Ffmpeg\Bot.Infrastructure.Ffmpeg.csproj" />
       <ProjectReference Include="..\Bot.Infrastructure.YouTube\Bot.Infrastructure.YouTube.csproj" />
     </ItemGroup>
 
@@ -33,6 +34,12 @@
       <Content Include="appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="SLAVA_UKRAINI">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

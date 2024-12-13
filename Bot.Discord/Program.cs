@@ -1,9 +1,11 @@
 ﻿using Bot.Application.Common.Interfaces;
 using Bot.Application.Common.Services;
+using Bot.Application.Common.Types;
 using Bot.Discord.Common;
 using Bot.Discord.Common.Bot;
 using Bot.Discord.Common.DependencyInjection;
 using Bot.Domain.Entities;
+using Bot.Infrastructure.Ffmpeg;
 using Bot.Infrastructure.YouTube;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,11 +21,13 @@ await Host.CreateDefaultBuilder()
         services
             .AddSingleton<ITest, Test>()
             .AddTransient<ITrackSourceResolver, TrackSourceResolver>()
+            .AddTransient<IPcmAudioConverter, FfmpegPcmAudioConverter>()
             .AddMediatR(x =>
             {
                 x.RegisterServicesFromAssembly(Bot.Application.AssemblyReference.Assembly);
             })
-            .AddSingleton(typeof(IFactory<TrackQueue, ulong>), typeof(GuildTrackQueueFactory))
+            .AddTransient<IFactory<ITrackClient, TrackSource>, TrackClientFactory>()
+            .AddSingleton<IFactory<TrackQueue, ulong>, GuildTrackQueueFactory>()
             .AddTransient<ITrackClient, YouTubeTrackClient>()
             .AddHostedService<BotService>();
     })

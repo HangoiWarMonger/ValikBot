@@ -39,7 +39,7 @@ public class PlayCommand : BaseCommandModule
         var getTrackInfoRequest = new GetTrackInfoRequest(url);
         TrackInfoDto trackInfo = await _sender.Send(getTrackInfoRequest);
 
-        await ctx.Channel.SendMessageAsync(MusicEmbed.TrackEmbed(trackInfo, ctx.Member!));
+        await ctx.Channel.SendMessageAsync(MusicEmbed.TrackQueued(trackInfo, ctx.Member!));
 
         var enqueueTrack = new EnqueueTrackRequest(url, ctx.Guild.Id);
         await _sender.Send(enqueueTrack);
@@ -52,7 +52,7 @@ public class PlayCommand : BaseCommandModule
         await _sender.Send(
             new PlayTrackRequest(
                 guildId: ctx.Guild.Id,
-                restreamAction: stream => stream.CopyToAsync(transmit),
+                restreamAction: (stream, token) => stream.CopyToAsync(transmit, cancellationToken: token),
                 endStreamAction: transmit.FlushAsync()));
     }
 

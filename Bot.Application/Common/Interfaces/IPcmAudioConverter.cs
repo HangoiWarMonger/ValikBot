@@ -8,5 +8,5 @@ public interface IPcmAudioConverter
     /// <param name="audioStream">Аудио поток.</param>
     /// <param name="reStreamAction">Метод записи сконвертированного потока.</param>
     /// <param name="cancellationToken">Токен для отмены операции.</param>
-    Task ConvertAndStreamAsync(Stream audioStream, Func<Stream, Task> reStreamAction, CancellationToken cancellationToken = default);
+    Task ConvertAndStreamAsync(Stream audioStream, Func<Stream, CancellationToken, Task> reStreamAction, CancellationToken cancellationToken = default);
 }

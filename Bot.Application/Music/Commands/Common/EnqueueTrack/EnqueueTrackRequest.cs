@@ -8,7 +8,7 @@ namespace Bot.Application.Music.Commands.Common.EnqueueTrack;
 public class EnqueueTrackRequest : IRequest
 {
     /// <summary>
-    /// ссылка на трек.
+    /// Cсылка на трек.
     /// </summary>
     public string Url { get; init; }
 

@@ -6,8 +6,15 @@ using Bot.Domain.Validation;
 
 namespace Bot.Application.Common.Services;
 
+/// <summary>
+/// Сервис, определяющий источник ссылки.
+/// </summary>
 public partial class TrackSourceResolver : ITrackSourceResolver
 {
+    /// <summary>
+    /// Определение источника ссылки.
+    /// </summary>
+    /// <param name="url">Ссылка.</param>
     public TrackSource GetTrackSource(string url)
     {
         Guard.Against.NullOrWhiteSpace(url);

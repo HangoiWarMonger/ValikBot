@@ -41,14 +41,16 @@ public class YouTubeTrackClient : ITrackClient
     {
         Guard.Against.NullOrWhiteSpace(url);
 
-        var video = await _youtubeClient.Videos.GetAsync(url);
+        var youtube = VideoLibrary.YouTube.Default;
+
+        var realVideo = await youtube.GetVideoAsync(url);
 
         return new TrackInfoDto
         {
-            Title = video.Title,
-            Url = video.Url,
-            Duration = video.Duration,
-            ThumbnailUrl = video.Thumbnails[0].Url,
+            Title = realVideo.Title,
+            Url = url,
+            Duration = TimeSpan.FromSeconds(100),
+            ThumbnailUrl = "",
         };
     }
 

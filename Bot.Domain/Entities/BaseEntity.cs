@@ -11,6 +11,21 @@ public class BaseEntity<T> : IEquatable<T> where T : BaseEntity<T>
     public Guid Id { get; init; }
 
     /// <summary>
+    /// Базовая сущность.
+    /// </summary>
+    protected BaseEntity(Guid id)
+    {
+        Id = id;
+    }
+
+    /// <summary>
+    /// Базовая сущность.
+    /// </summary>
+    protected BaseEntity()
+    {
+    }
+
+    /// <summary>
     /// Сравнение объекта с другим объектом этого же типа.
     /// </summary>
     /// <param name="other">Объект, с которым производится сравнение.</param>

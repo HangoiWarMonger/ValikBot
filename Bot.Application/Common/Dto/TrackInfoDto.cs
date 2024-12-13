@@ -24,6 +24,4 @@ public class TrackInfoDto
     /// Ссылка на значок видео.
     /// </summary>
     public string ThumbnailUrl { get; init; }
-    
-    
 }
