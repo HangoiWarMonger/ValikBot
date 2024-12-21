@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Valik.Api", "Discord.Valik.Api\Discord.Valik.Api.csproj", "{1DFD3712-C34C-41C4-BD22-91A4C226B777}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B116789C-3F05-4906-A264-57D82FD18460}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{BD0B5496-C473-4574-AE61-695168D94F94}"
@@ -24,16 +22,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot.Discord", "Bot.Discord\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot.Infrastructure.Ffmpeg", "Bot.Infrastructure.Ffmpeg\Bot.Infrastructure.Ffmpeg.csproj", "{56929DC2-0611-4A20-865C-14E24BEFF186}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BA64D00E-24A1-4866-B240-EE7258DFBAF5}"
+	ProjectSection(SolutionItems) = preProject
+		yt-dlp.exe = yt-dlp.exe
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1DFD3712-C34C-41C4-BD22-91A4C226B777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1DFD3712-C34C-41C4-BD22-91A4C226B777}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1DFD3712-C34C-41C4-BD22-91A4C226B777}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1DFD3712-C34C-41C4-BD22-91A4C226B777}.Release|Any CPU.Build.0 = Release|Any CPU
 		{72268293-CC02-446D-86C6-A566040AE100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{72268293-CC02-446D-86C6-A566040AE100}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72268293-CC02-446D-86C6-A566040AE100}.Release|Any CPU.ActiveCfg = Release|Any CPU

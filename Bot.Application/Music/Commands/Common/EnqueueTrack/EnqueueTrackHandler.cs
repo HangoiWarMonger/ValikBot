@@ -5,16 +5,27 @@ using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.EnqueueTrack;
 
-public class EnqueueTrackRequestHandler : IRequestHandler<EnqueueTrackRequest>
+/// <summary>
+/// Добавление трека в очередь.
+/// </summary>
+public class EnqueueTrackHandler : IRequestHandler<EnqueueTrackRequest>
 {
     private readonly IFactory<TrackQueue, ulong> _trackQueueFactory;
     private TrackQueue _trackQueue;
 
-    public EnqueueTrackRequestHandler(IFactory<TrackQueue, ulong> trackQueueFactory)
+    /// <summary>
+    /// Добавление трека в очередь.
+    /// </summary>
+    public EnqueueTrackHandler(IFactory<TrackQueue, ulong> trackQueueFactory)
     {
         _trackQueueFactory = trackQueueFactory;
     }
 
+    /// <summary>
+    /// Добавление трека в очередь.
+    /// </summary>
+    /// <param name="request">Запрос на добавление.</param>
+    /// <param name="cancellationToken">Токен для отмены операции.</param>
     public Task Handle(EnqueueTrackRequest request, CancellationToken cancellationToken)
     {
         Guard.Against.Null(request, nameof(EnqueueTrackRequest));

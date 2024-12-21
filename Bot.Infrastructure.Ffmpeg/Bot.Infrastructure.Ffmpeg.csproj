@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <PackageReference Include="FFMpegCore" Version="5.1.0" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
     </ItemGroup>
 
 </Project>

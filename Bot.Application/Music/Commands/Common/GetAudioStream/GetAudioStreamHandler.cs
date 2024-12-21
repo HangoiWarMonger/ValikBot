@@ -5,17 +5,28 @@ using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.GetAudioStream;
 
-public class GetAudioStreamYoutubeFromUrlResolver : IRequestHandler<GetAudioStreamRequest, Stream>
+/// <summary>
+/// Получение аудио потока.
+/// </summary>
+public class GetAudioStreamHandler : IRequestHandler<GetAudioStreamRequest, Stream>
 {
     private readonly IFactory<ITrackClient, TrackSource> _trackClientFactory;
     private readonly ITrackSourceResolver _trackSourceResolver;
 
-    public GetAudioStreamYoutubeFromUrlResolver(ITrackSourceResolver trackSourceResolver, IFactory<ITrackClient, TrackSource> trackClientFactory)
+    /// <summary>
+    /// Получение аудио потока.
+    /// </summary>
+    public GetAudioStreamHandler(ITrackSourceResolver trackSourceResolver, IFactory<ITrackClient, TrackSource> trackClientFactory)
     {
         _trackSourceResolver = trackSourceResolver;
         _trackClientFactory = trackClientFactory;
     }
 
+    /// <summary>
+    /// Получение аудио потока.
+    /// </summary>
+    /// <param name="request">Запрос.</param>
+    /// <param name="cancellationToken">Токен для отмены операции.</param>
     public Task<Stream> Handle(GetAudioStreamRequest request, CancellationToken cancellationToken)
     {
         Guard.Against.Null(request, nameof(request));

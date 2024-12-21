@@ -3,6 +3,7 @@ using Bot.Application.Common.Interfaces;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using FFMpegCore.Pipes;
+using Microsoft.Extensions.Options;
 
 namespace Bot.Infrastructure.Ffmpeg;
 
@@ -11,6 +12,13 @@ namespace Bot.Infrastructure.Ffmpeg;
 /// </summary>
 public class FfmpegPcmAudioConverter : IPcmAudioConverter
 {
+    private readonly FfmpegOptions _options;
+
+    public FfmpegPcmAudioConverter(IOptions<FfmpegOptions> options)
+    {
+        _options = Guard.Against.Null(options.Value, nameof(options));
+    }
+
     /// <summary>
     /// Переконвертирует поток данных в pcm формат в поток (метод записи задается в делегате).
     /// </summary>
@@ -29,7 +37,7 @@ public class FfmpegPcmAudioConverter : IPcmAudioConverter
                 .ForceFormat("wav"))
             .ProcessAsynchronously(false, new FFOptions
             {
-                BinaryFolder = "D:\\FFmpeg\\bin"
+                BinaryFolder = _options.BinaryPath
             });
     }
 }

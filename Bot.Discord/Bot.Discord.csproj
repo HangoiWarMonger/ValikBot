@@ -5,17 +5,20 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="DSharpPlus" Version="4.5.0" />
       <PackageReference Include="DSharpPlus.CommandsNext" Version="4.5.0" />
       <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.0" />
-      <PackageReference Include="DSharpPlus.Rest" Version="4.5.0" />
       <PackageReference Include="DSharpPlus.SlashCommands" Version="4.5.0" />
       <PackageReference Include="DSharpPlus.VoiceNext" Version="4.5.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+      <PackageReference Include="Serilog" Version="4.2.0" />
+      <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,7 +28,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Update="SLAVA_UKRAINI">
+      <None Remove="cookies.txt" />
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+      <Content Include="cookies.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
@@ -34,12 +41,6 @@
       <Content Include="appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="SLAVA_UKRAINI">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
     </ItemGroup>
 
 </Project>
