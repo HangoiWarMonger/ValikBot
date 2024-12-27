@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.GetUrlFromTextRequest;
 
-public class GetUrlFromTextHandler : IRequestHandler<GetUrlFromTextRequest, string>
+public class GetUrlFromTextHandler : IRequestHandler<GetUrlFromTextRequest, string[]>
 {
     private readonly ITrackClient _trackClient;
 
@@ -21,21 +21,23 @@ public class GetUrlFromTextHandler : IRequestHandler<GetUrlFromTextRequest, stri
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<string> Handle(GetUrlFromTextRequest request, CancellationToken cancellationToken)
+    public async Task<string[]> Handle(GetUrlFromTextRequest request, CancellationToken cancellationToken)
     {
         Guard.Against.Null(request, nameof(request));
         Guard.Against.NullOrWhiteSpace(request.RequestText, nameof(request.RequestText));
 
         Uri.TryCreate(request.RequestText, UriKind.Absolute, out Uri? uriResult);
 
-        if (uriResult?.Scheme == Uri.UriSchemeHttp || uriResult?.Scheme == Uri.UriSchemeHttps)
+        if (uriResult is null)
         {
-            return request.RequestText;
+            var result = await _trackClient.SearchTrackUrlAsync(request.RequestText, cancellationToken);
+            ThrowIf.NullOrWhiteSpace(result, nameof(result));
+
+            return [result!];
         }
 
-        var result = await _trackClient.SearchTrackUrlAsync(request.RequestText, cancellationToken);
-        ThrowIf.NullOrWhiteSpace(result, nameof(result));
+        var tracksFromLink = await _trackClient.GetTracksFromLink(request.RequestText);
 
-        return result!;
+        return tracksFromLink;
     }
 }

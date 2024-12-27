@@ -58,8 +58,6 @@ public class SlashSkipCommand : ApplicationCommandModule
             return;
         }
 
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(Embed.TrackSkip(ctx.Member!)));
-
         _logger.LogDebug("Пропускаем трек...");
         var skip = new SkipTrackRequest(ctx.Guild.Id);
         await _sender.Send(skip);

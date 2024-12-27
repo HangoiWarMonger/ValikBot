@@ -1,5 +1,6 @@
 using Bot.Discord.Commands.Music.Slash;
 using Bot.Discord.Common.Graphics.Embed;
+using Bot.Discord.Components;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
@@ -16,12 +17,14 @@ public sealed class BotService : IHostedService
     private readonly IServiceProvider _serviceProvider;
     private readonly BotSettings _settings;
     private readonly ILogger<BotService> _logger;
+    private readonly ComponentService _componentService;
     private DiscordClient _client;
 
-    public BotService(IServiceProvider serviceProvider, IOptions<BotSettings> settings, ILogger<BotService> logger)
+    public BotService(IServiceProvider serviceProvider, IOptions<BotSettings> settings, ILogger<BotService> logger, ComponentService componentService)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _componentService = componentService;
         _settings = settings.Value;
     }
 
@@ -61,13 +64,23 @@ public sealed class BotService : IHostedService
 
         slashConfig.SlashCommandErrored += async (_, args) =>
         {
-            if (args.Exception is ObjectDisposedException) return;
+            switch (args.Exception)
+            {
+                case ObjectDisposedException:
+                case IOException {Message: "Broken pipe"}:
+                    return;
+            }
 
             _logger.LogCritical($"Exception: {args.Exception.GetType().Name}: {args.Exception.Message}");
             _logger.LogError("{Trace}", args.Exception.StackTrace);
 
             await args.Context.EditResponseAsync(new DiscordWebhookBuilder()
                 .AddEmbed(Embed.Error(args.Context.Member, args.Exception.Message)));
+        };
+
+        _client.ComponentInteractionCreated += async (client, args) =>
+        {
+            await _componentService.ExecuteAsync(client, args);
         };
 
         _client.UseVoiceNext(new VoiceNextConfiguration

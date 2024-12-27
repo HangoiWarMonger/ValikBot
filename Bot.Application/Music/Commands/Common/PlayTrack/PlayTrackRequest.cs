@@ -1,3 +1,4 @@
+using Bot.Domain.Entities;
 using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.PlayTrack;
@@ -12,17 +13,23 @@ public class PlayTrackRequest : IRequest
     /// <summary>
     /// Функция по завершению стриминга.
     /// </summary>
-    public Task EndStreamAction { get; init; }
+    public Func<Task> EndStreamAction { get; init; }
 
     /// <summary>
     /// Id гильдии.
     /// </summary>
     public ulong GuildId { get; set; }
 
-    public PlayTrackRequest( Func<Stream, CancellationToken, Task> restreamAction, Task endStreamAction, ulong guildId)
+    /// <summary>
+    /// Действие при проигрывании нового трека.
+    /// </summary>
+    public Func<MusicTrack, Task> OnNewTrackAction { get; init; }
+
+    public PlayTrackRequest(Func<Stream, CancellationToken, Task> restreamAction, Func<Task> endStreamAction, ulong guildId, Func<MusicTrack, Task> onNewTrackAction)
     {
         RestreamAction = restreamAction;
         EndStreamAction = endStreamAction;
         GuildId = guildId;
+        OnNewTrackAction = onNewTrackAction;
     }
 }

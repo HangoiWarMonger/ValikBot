@@ -123,6 +123,60 @@ public class YouTubeTrackClient : ITrackClient
         return $"https://www.youtube.com/watch?v={videoId}";
     }
 
+    /// <summary>
+    /// Получение списка треков из ссылки.
+    /// <remarks>
+    /// Если ссылка на одиночный трек, то возвращает его же,
+    /// Если ссылка на плейлист, то возвращается список треков.
+    /// </remarks>
+    /// </summary>
+    /// <param name="requestRequestText"></param>
+    /// <returns></returns>
+    public async Task<string[]> GetTracksFromLink(string requestRequestText)
+    {
+        Guard.Against.NullOrWhiteSpace(requestRequestText, nameof(requestRequestText));
+
+        if (requestRequestText.Contains("list=")) // Проверяем, является ли ссылка плейлистом
+        {
+            var playlistId = ExtractPlaylistIdFromUrl(requestRequestText);
+            ThrowIf.NullOrWhiteSpace(playlistId, nameof(playlistId));
+
+            using var httpClient = new HttpClient();
+            var url = $"https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId={playlistId}&key={_options.ApiKey}";
+
+            var response = await httpClient.GetStringAsync(url);
+            using var jsonDoc = JsonDocument.Parse(response);
+
+            var items = jsonDoc.RootElement.GetProperty("items");
+            var trackUrls = new List<string>();
+
+            foreach (var item in items.EnumerateArray())
+            {
+                var videoId = item.GetProperty("contentDetails").GetProperty("videoId").GetString();
+                if (!string.IsNullOrWhiteSpace(videoId))
+                {
+                    trackUrls.Add($"https://www.youtube.com/watch?v={videoId}");
+                }
+            }
+
+            return trackUrls.ToArray();
+        }
+        else // Если это одиночное видео
+        {
+            var videoId = ExtractVideoIdFromUrl(requestRequestText);
+            ThrowIf.NullOrWhiteSpace(videoId, nameof(videoId));
+
+            return [$"https://www.youtube.com/watch?v={videoId}"];
+        }
+    }
+
+    private string? ExtractPlaylistIdFromUrl(string url)
+    {
+        var uri = new Uri(url);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        return query["list"];
+    }
+
     private string? ExtractVideoIdFromUrl(string url)
     {
         var uri = new Uri(url);

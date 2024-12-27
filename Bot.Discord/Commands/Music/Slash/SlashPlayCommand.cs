@@ -4,6 +4,7 @@ using Bot.Application.Music.Commands.Common.GetTrackInfo;
 using Bot.Application.Music.Commands.Common.GetUrlFromTextRequest;
 using Bot.Application.Music.Commands.Common.PlayTrack;
 using Bot.Discord.Common.Graphics.Embed;
+using Bot.Discord.Components;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -51,18 +52,25 @@ public class SlashPlayCommand : ApplicationCommandModule
 
         _logger.LogDebug("Получение url из запроса.");
         var getUrlRequest = new GetUrlFromTextRequest(request);
-        var url = await _sender.Send(getUrlRequest);
-        _logger.LogDebug("Url получен - {Url}", url);
+        var urls = await _sender.Send(getUrlRequest);
+        _logger.LogDebug("Urls получен - {Urls}", urls);
 
         _logger.LogDebug("Получение информации о видео.");
-        var getTrackInfoRequest = new GetTrackInfoRequest(url);
+
+        var getTrackInfoRequest = new GetTrackInfoRequest(urls.First());
         TrackInfoDto trackInfo = await _sender.Send(getTrackInfoRequest);
         _logger.LogDebug("Информация получена.");
 
-        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(Embed.TrackQueued(trackInfo, ctx.Member!)));
-
-        var enqueueTrack = new EnqueueTrackRequest(url, ctx.Guild.Id);
+        var enqueueTrack = new EnqueueTrackRequest(urls, ctx.Guild.Id);
         await _sender.Send(enqueueTrack);
+
+        var info = $"Добавлено: {trackInfo.Title}";
+        if (urls.Length > 1)
+        {
+            info += $" (и еще {urls.Length})";
+        }
+
+        await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(Embed.Info(info)));
 
         _logger.LogDebug("Получение соединения с голосовым каналом");
         var voice = ctx.Client.GetVoiceNext();
@@ -71,11 +79,26 @@ public class SlashPlayCommand : ApplicationCommandModule
         var transmit = connection.GetTransmitSink();
 
         _logger.LogDebug("Отправка запроса на проигрывание трека");
+
+        DiscordMessage message = null!;
         await _sender.Send(
             new PlayTrackRequest(
+                onNewTrackAction: async (track) =>
+                {
+                    var trackInfoRequest = new GetTrackInfoRequest(track.Link.Url);
+                    TrackInfoDto info = await _sender.Send(trackInfoRequest);
+
+                    message = await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                        .AddEmbed(Embed.TrackQueued(info, ctx.Member!))
+                        .AddComponents(UiComponent.SkipButton));
+                },
                 guildId: ctx.Guild.Id,
                 restreamAction: (stream, token) => stream.CopyToAsync(transmit, cancellationToken: token),
-                endStreamAction: transmit.FlushAsync()));
+                endStreamAction: async () =>
+                {
+                    await message.DeleteAsync();
+                    await transmit.FlushAsync();
+                }));
     }
 
     private DiscordChannel? GetVoiceChannel(DiscordMember? member)

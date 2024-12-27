@@ -29,14 +29,16 @@ public class EnqueueTrackHandler : IRequestHandler<EnqueueTrackRequest>
     public Task Handle(EnqueueTrackRequest request, CancellationToken cancellationToken)
     {
         Guard.Against.Null(request, nameof(EnqueueTrackRequest));
-        Guard.Against.NullOrWhiteSpace(request.Url, nameof(request.Url));
         Guard.Against.Default(request.GuildId, nameof(request.GuildId));
 
         _trackQueue = _trackQueueFactory.Get(request.GuildId);
 
-        var track = new MusicTrack(request.Url);
+        foreach (var url in request.Urls)
+        {
+            var track = new MusicTrack(url);
 
-        _trackQueue.Enqueue(track);
+            _trackQueue.Enqueue(track);
+        }
 
         return Task.CompletedTask;
     }

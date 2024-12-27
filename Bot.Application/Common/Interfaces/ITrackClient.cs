@@ -28,4 +28,15 @@ public interface ITrackClient
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Ссылка на трек.</returns>
     Task<string?> SearchTrackUrlAsync(string request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Получение списка треков из ссылки.
+    /// <remarks>
+    /// Если ссылка на одиночный трек, то возвращает его же,
+    /// Если ссылка на плейлист, то возвращается список треков.
+    /// </remarks>
+    /// </summary>
+    /// <param name="requestRequestText"></param>
+    /// <returns></returns>
+    Task<string[]> GetTracksFromLink(string requestRequestText);
 }

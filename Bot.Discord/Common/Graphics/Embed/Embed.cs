@@ -9,14 +9,12 @@ public static class Embed
     {
         return new DiscordEmbedBuilder
             {
-                Title = "Трек добавлен в очередь!",
                 Color = DiscordColor.Green
             }
             .AddField("Название", $"[{trackInfo.Title}]({trackInfo.Url})", inline: false)
             .AddField("Длительность", trackInfo.Duration?.ToString(@"hh\:mm\:ss") ?? "Неизвестна", inline: true)
             .WithThumbnail(trackInfo.ThumbnailUrl)
-            .WithFooter($"Добавлено пользователем: {member.DisplayName}", member.AvatarUrl)
-            .WithTimestamp(DateTime.UtcNow);
+            .WithFooter($"От: {member.DisplayName}", member.AvatarUrl);
     }
 
     public static DiscordEmbed TrackSkip(DiscordMember member)
@@ -40,12 +38,20 @@ public static class Embed
         return Error(member, "Нет треков в очереди!");
     }
 
+    public static DiscordEmbed Info(string info)
+    {
+        return new DiscordEmbedBuilder()
+            .WithDescription(info)
+            .WithColor(DiscordColor.DarkGray)
+            .Build();
+    }
+
     public static DiscordEmbed Error(DiscordMember member, string error)
     {
         return new DiscordEmbedBuilder
             {
                 Title = "Ошибка!",
-                Color = DiscordColor.Red
+                Color = DiscordColor.IndianRed
             }
             .AddField("Сообшение", error, inline: true)
             .WithFooter($"Для {member.DisplayName}", member.AvatarUrl)

@@ -29,11 +29,11 @@ public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
 
         if (!_trackQueue.IsPlaying)
         {
-            await PlayNextInQueue(request.RestreamAction, request.EndStreamAction);
+            await PlayNextInQueue(request.RestreamAction, request.EndStreamAction, request.OnNewTrackAction);
         }
     }
 
-    private async Task PlayNextInQueue(Func<Stream, CancellationToken, Task> restreamAction, Task endStreamAction)
+    private async Task PlayNextInQueue(Func<Stream, CancellationToken, Task> restreamAction, Func<Task> endStreamAction, Func<MusicTrack, Task> onNewTrackAction)
     {
         if (_trackQueue.TryDequeue(out var track))
         {
@@ -43,14 +43,15 @@ public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
             {
                 await using var audioStream = await _sender.Send(new GetAudioStreamRequest(track!.Link.Url), _trackQueue.CancellationToken);
 
+                await onNewTrackAction(track);
                 await _pcmAudioConverter.ConvertAndStreamAsync(audioStream, restreamAction, _trackQueue.CancellationToken);
             }
             finally
             {
                 _trackQueue.IsPlaying = false;
-                await endStreamAction;
+                await endStreamAction();
 
-                await PlayNextInQueue(restreamAction, endStreamAction);
+                await PlayNextInQueue(restreamAction, endStreamAction, onNewTrackAction);
             }
         }
     }

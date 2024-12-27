@@ -30,7 +30,6 @@ public static class ServiceExtensions
         services.Configure<FfmpegOptions>(options =>
             {
                 configuration.Bind(FfmpegOptions.SectionName, options);
-                options.BinaryPath = "/usr/bin";
 
                 ThrowIf.Null(options, nameof(options));
                 ThrowIf.NullOrWhiteSpace(options.BinaryPath, nameof(options.BinaryPath));

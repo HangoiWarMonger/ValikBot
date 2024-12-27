@@ -34,6 +34,7 @@ public class FfmpegPcmAudioConverter : IPcmAudioConverter
             .OutputToPipe(new StreamPipeSink((stream, _) => reStreamAction(stream, cancellationToken)), options => options
                 .WithAudioBitrate(AudioQuality.Normal)
                 .WithCustomArgument("-ar 48000")
+                .WithCustomArgument("-async 1")   // Разрешаем асинхронную обработку
                 .ForceFormat("wav"))
             .ProcessAsynchronously(false, new FFOptions
             {

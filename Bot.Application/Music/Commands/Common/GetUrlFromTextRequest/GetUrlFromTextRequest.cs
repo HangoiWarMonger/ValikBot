@@ -3,10 +3,9 @@ using MediatR;
 namespace Bot.Application.Music.Commands.Common.GetUrlFromTextRequest;
 
 /// <summary>
-/// Запрос на получение ссылки из запроса.
-/// <remarks>Если запрос уже является ссылкой - вернет ссылку в неизменном виде.</remarks>
+/// Запрос на получение списка ссылок на треки из запроса.
 /// </summary>
-public class GetUrlFromTextRequest : IRequest<string>
+public class GetUrlFromTextRequest : IRequest<string[]>
 {
     /// <summary>
     /// Текст-запрос.
@@ -14,9 +13,8 @@ public class GetUrlFromTextRequest : IRequest<string>
     public string RequestText { get; init; }
 
     /// <summary>
-    /// Запрос на получение ссылки из запроса.
+    /// Запрос на получение списка ссылок на треки из запроса.
     /// </summary>
-    /// <remarks>Если запрос уже является ссылкой - вернет ссылку в неизменном виде.</remarks>
     /// <param name="requestText">Текст-запрос.</param>
     public GetUrlFromTextRequest(string requestText)
     {

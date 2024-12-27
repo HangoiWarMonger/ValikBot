@@ -8,9 +8,9 @@ namespace Bot.Application.Music.Commands.Common.EnqueueTrack;
 public class EnqueueTrackRequest : IRequest
 {
     /// <summary>
-    /// Cсылка на трек.
+    /// Cсылки на треки.
     /// </summary>
-    public string Url { get; init; }
+    public string[] Urls { get; init; }
 
     /// <summary>
     /// Id гильдии.
@@ -20,9 +20,9 @@ public class EnqueueTrackRequest : IRequest
     /// <summary>
     /// Добавление трека в очередь.
     /// </summary>
-    public EnqueueTrackRequest(string url, ulong guildId)
+    public EnqueueTrackRequest(string[] urls, ulong guildId)
     {
-        Url = url;
+        Urls = urls;
         GuildId = guildId;
     }
 }

@@ -1,10 +1,13 @@
 ﻿using Bot.Application.Common.Interfaces;
 using Bot.Application.Common.Services;
 using Bot.Application.Common.Types;
+using Bot.Application.Music.Commands.Common.SkipTrack;
 using Bot.Discord.Common.Bot;
 using Bot.Discord.Common.DependencyInjection;
 using Bot.Discord.Common.Extensions;
+using Bot.Discord.Components;
 using Bot.Domain.Entities;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,6 +32,20 @@ await Host.CreateDefaultBuilder()
         });
 
         services.Configure<BotSettings>(x => hostContext.Configuration.Bind(BotSettings.SectionName, x));
+
+        services.AddSingleton<ComponentService>(provider =>
+        {
+            var service = new ComponentService();
+
+            var sender = provider.GetRequiredService<ISender>();
+            service.Register(UiComponent.SkipButton, async (_, eventArgs) =>
+            {
+                var skipRequest = new SkipTrackRequest(eventArgs.Guild.Id);
+                await sender.Send(skipRequest);
+            });
+
+            return service;
+        });
 
         services
             .AddTransient<ITrackSourceResolver, TrackSourceResolver>()
