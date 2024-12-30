@@ -24,6 +24,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Bot.Application\Bot.Application.csproj" />
       <ProjectReference Include="..\Bot.Infrastructure.Ffmpeg\Bot.Infrastructure.Ffmpeg.csproj" />
+      <ProjectReference Include="..\Bot.Infrastructure.SoundCloud\Bot.Infrastructure.SoundCloud.csproj" />
       <ProjectReference Include="..\Bot.Infrastructure.YouTube\Bot.Infrastructure.YouTube.csproj" />
     </ItemGroup>
 

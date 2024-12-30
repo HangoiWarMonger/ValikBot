@@ -5,13 +5,18 @@ namespace Bot.Discord.Common.Graphics.Embed;
 
 public static class Embed
 {
+    private const char EmptyChar = '\u2000';
+
     public static DiscordEmbed TrackQueued(TrackInfoDto trackInfo, DiscordMember member)
     {
         return new DiscordEmbedBuilder
             {
                 Color = DiscordColor.Green
             }
-            .AddField("Название", $"[{trackInfo.Title}]({trackInfo.Url})", inline: false)
+            .WithDescription($"""
+                            ### Название: 
+                            "[{trackInfo.Title}]({trackInfo.Url})"
+                            """)
             .AddField("Длительность", trackInfo.Duration?.ToString(@"hh\:mm\:ss") ?? "Неизвестна", inline: true)
             .WithThumbnail(trackInfo.ThumbnailUrl)
             .WithFooter($"От: {member.DisplayName}", member.AvatarUrl);

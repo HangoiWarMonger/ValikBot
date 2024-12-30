@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Bot.Domain.Exceptions;
 using Bot.Domain.ValueObjects;
 using FluentValidation;
@@ -8,7 +7,7 @@ namespace Bot.Domain.Validation;
 /// <summary>
 /// Валидатор ссылки на трек.
 /// </summary>
-public partial class TrackLinkValidator : AbstractValidator<TrackLink>
+public class TrackLinkValidator : AbstractValidator<TrackLink>
 {
     /// <summary>
     /// Валидатор ссылки на трек.
@@ -18,10 +17,7 @@ public partial class TrackLinkValidator : AbstractValidator<TrackLink>
         RuleFor(x => x.Url)
             .NotNull()
             .NotEmpty()
-            .Matches(UrlRegex())
+            .Must(x => Uri.IsWellFormedUriString(x, UriKind.Absolute))
             .WithMessage(ExceptionMessage.InvalidUrl());
     }
-
-    [GeneratedRegex($"{ValidationConstant.YouTubeVideoUrlRegex}")]
-    private static partial Regex UrlRegex();
 }

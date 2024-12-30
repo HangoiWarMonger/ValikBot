@@ -1,12 +1,11 @@
 ﻿using Bot.Application.Common.Interfaces;
-using Bot.Application.Common.Services;
-using Bot.Application.Common.Types;
 using Bot.Application.Music.Commands.Common.SkipTrack;
 using Bot.Discord.Common.Bot;
 using Bot.Discord.Common.DependencyInjection;
 using Bot.Discord.Common.Extensions;
 using Bot.Discord.Components;
 using Bot.Domain.Entities;
+using Bot.Infrastructure.YouTube;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,17 +45,22 @@ await Host.CreateDefaultBuilder()
 
             return service;
         });
-
         services
-            .AddTransient<ITrackSourceResolver, TrackSourceResolver>()
             .AddYouTubeTrackClient(hostContext.Configuration)
+            .AddSoundCloudTrackClient(hostContext.Configuration)
             .AddFfmpeg(hostContext.Configuration)
             .AddMediatR(x =>
             {
                 x.RegisterServicesFromAssembly(Bot.Application.AssemblyReference.Assembly);
             })
-            .AddTransient<IFactory<ITrackClient, TrackSource>, TrackClientFactory>()
-            .AddSingleton<IFactory<TrackQueue, ulong>, GuildTrackQueueFactory>()
+            .AddTransient<IFactory<ITrackClient, string>, TrackClientFactory>()
+            .AddTransient<ISearchService, YouTubeTrackClient>()
+            .AddSingleton<GuildTrackQueueFactory>()
+            .AddSingleton<IFactory<TrackQueue, ulong>>(provider =>
+            {
+                var guildTrackQueueFactory = provider.GetRequiredService<GuildTrackQueueFactory>();
+                return guildTrackQueueFactory;
+            })
             .AddHostedService<BotService>();
     })
     .RunConsoleAsync();

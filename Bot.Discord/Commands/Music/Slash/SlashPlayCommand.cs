@@ -53,7 +53,8 @@ public class SlashPlayCommand : ApplicationCommandModule
         _logger.LogDebug("Получение url из запроса.");
         var getUrlRequest = new GetUrlFromTextRequest(request);
         var urls = await _sender.Send(getUrlRequest);
-        _logger.LogDebug("Urls получен - {Urls}", urls);
+
+        _logger.LogDebug("Urls получен - {Urls}", string.Join(", ", urls));
 
         _logger.LogDebug("Получение информации о видео.");
 
@@ -67,7 +68,7 @@ public class SlashPlayCommand : ApplicationCommandModule
         var info = $"Добавлено: {trackInfo.Title}";
         if (urls.Length > 1)
         {
-            info += $" (и еще {urls.Length})";
+            info += $" (и еще {urls.Length-1})";
         }
 
         await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(Embed.Info(info)));
@@ -86,10 +87,10 @@ public class SlashPlayCommand : ApplicationCommandModule
                 onNewTrackAction: async (track) =>
                 {
                     var trackInfoRequest = new GetTrackInfoRequest(track.Link.Url);
-                    TrackInfoDto info = await _sender.Send(trackInfoRequest);
+                    TrackInfoDto infoDto = await _sender.Send(trackInfoRequest);
 
                     message = await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
-                        .AddEmbed(Embed.TrackQueued(info, ctx.Member!))
+                        .AddEmbed(Embed.TrackQueued(infoDto, ctx.Member!))
                         .AddComponents(UiComponent.SkipButton));
                 },
                 guildId: ctx.Guild.Id,

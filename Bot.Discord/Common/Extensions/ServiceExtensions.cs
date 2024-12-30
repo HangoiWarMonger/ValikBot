@@ -1,6 +1,7 @@
 using Bot.Application.Common.Interfaces;
 using Bot.Domain.Validation;
 using Bot.Infrastructure.Ffmpeg;
+using Bot.Infrastructure.SoundCloud;
 using Bot.Infrastructure.YouTube;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,23 @@ namespace Bot.Discord.Common.Extensions;
 
 public static class ServiceExtensions
 {
+    public static IServiceCollection AddSoundCloudTrackClient(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddTransient<HttpClient>();
+
+        services
+            .Configure<SoundCloudOptions>(options =>
+            {
+                configuration.Bind(SoundCloudOptions.SectionName, options);
+
+                ThrowIf.NullOrWhiteSpace(options.ClientId, nameof(options.ClientId));
+            })
+            .AddTransient<ITrackClient, SoundCloudTrackClient>()
+            .AddTransient<SoundCloudTrackClient>();
+
+        return services;
+    }
+
     public static IServiceCollection AddYouTubeTrackClient(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<YoutubeApiOptions>(apiOptions =>

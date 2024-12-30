@@ -11,7 +11,7 @@ namespace Bot.Infrastructure.YouTube;
 /// <summary>
 /// Контракт работы клиента, работающего с треками.
 /// </summary>
-public class YouTubeTrackClient : ITrackClient
+public class YouTubeTrackClient : ITrackClient, ISearchService
 {
     private const string SearchUrl = "https://www.googleapis.com/youtube/v3/search";
     private const string VideoInfoUrl = "https://www.googleapis.com/youtube/v3/videos";
@@ -32,8 +32,6 @@ public class YouTubeTrackClient : ITrackClient
     {
         Guard.Against.NullOrWhiteSpace(videoUrl);
 
-        //string ytDlpPath = @"D:\yt-dlp.exe";
-       //ytDlpPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "yt-dlp.exe");
         var cookiesPath = "cookies.txt";
 
         ProcessStartInfo startInfo = new ProcessStartInfo

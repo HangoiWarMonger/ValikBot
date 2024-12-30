@@ -20,4 +20,14 @@ public class GuildTrackQueueFactory : IFactory<TrackQueue, ulong>
     {
         return _queues.GetOrAdd(key, _ => new TrackQueue());
     }
+
+    /// <summary>
+    /// Очищение очереди.
+    /// </summary>
+    /// <param name="key">Ключ.</param>
+    public void ReCreate(ulong key)
+    {
+        _queues.TryRemove(key, out _);
+        _queues.TryAdd(key, new TrackQueue());
+    }
 }

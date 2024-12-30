@@ -1,42 +1,37 @@
 using Ardalis.GuardClauses;
 using Bot.Application.Common.Interfaces;
 using Bot.Domain.Validation;
-//using Bot.Domain.Validation;
 using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.GetUrlFromTextRequest;
 
 public class GetUrlFromTextHandler : IRequestHandler<GetUrlFromTextRequest, string[]>
 {
-    private readonly ITrackClient _trackClient;
+    private readonly IFactory<ITrackClient, string> _trackClientFactory;
+    private readonly ISearchService _searchService;
 
-    public GetUrlFromTextHandler(ITrackClient trackClient)
+    public GetUrlFromTextHandler(ISearchService searchService, IFactory<ITrackClient, string> trackClientFactory)
     {
-        _trackClient = trackClient;
+        _searchService = searchService;
+        _trackClientFactory = trackClientFactory;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     public async Task<string[]> Handle(GetUrlFromTextRequest request, CancellationToken cancellationToken)
     {
         Guard.Against.Null(request, nameof(request));
         Guard.Against.NullOrWhiteSpace(request.RequestText, nameof(request.RequestText));
 
-        Uri.TryCreate(request.RequestText, UriKind.Absolute, out Uri? uriResult);
-
-        if (uriResult is null)
+        if (!Uri.TryCreate(request.RequestText, UriKind.Absolute, out _))
         {
-            var result = await _trackClient.SearchTrackUrlAsync(request.RequestText, cancellationToken);
+            var result = await _searchService.SearchTrackUrlAsync(request.RequestText, cancellationToken);
             ThrowIf.NullOrWhiteSpace(result, nameof(result));
 
             return [result!];
         }
 
-        var tracksFromLink = await _trackClient.GetTracksFromLink(request.RequestText);
+        var trackClient = _trackClientFactory.Get(request.RequestText);
+
+        var tracksFromLink = await trackClient.GetTracksFromLink(request.RequestText);
 
         return tracksFromLink;
     }

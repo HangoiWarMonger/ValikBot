@@ -1,4 +1,5 @@
 using Bot.Discord.Commands.Music.Slash;
+using Bot.Discord.Common.DependencyInjection;
 using Bot.Discord.Common.Graphics.Embed;
 using Bot.Discord.Components;
 using DSharpPlus;
@@ -6,6 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.VoiceNext;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -81,6 +83,29 @@ public sealed class BotService : IHostedService
         _client.ComponentInteractionCreated += async (client, args) =>
         {
             await _componentService.ExecuteAsync(client, args);
+        };
+
+        _client.VoiceStateUpdated += (_, args) =>
+        {
+            if (args.User.Id != _client.CurrentUser.Id) return Task.CompletedTask;
+
+            _logger.LogInformation("Изменение аудио состояния бота.");
+
+            var before = args.Before;
+            var after = args.After;
+
+            // Проверяем, был ли бот в голосовом канале и теперь ли он не в голосовом канале
+            if (before?.Channel == null || after?.Channel != null) return Task.CompletedTask;
+
+            var queueFactory = _serviceProvider.GetRequiredService<GuildTrackQueueFactory>();
+            var queue = queueFactory.Get(args.Guild.Id);
+
+            _logger.LogInformation("Есть ли треки в очереди? {HasTracks}", queue.IsPlaying);
+            queueFactory.ReCreate(args.Guild.Id);
+
+            queue = queueFactory.Get(args.Guild.Id);
+            _logger.LogInformation("Есть ли треки в очереди? {HasTracks}", queue.IsPlaying);
+            return Task.CompletedTask;
         };
 
         _client.UseVoiceNext(new VoiceNextConfiguration

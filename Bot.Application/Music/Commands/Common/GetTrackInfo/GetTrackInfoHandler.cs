@@ -1,7 +1,6 @@
 using Ardalis.GuardClauses;
 using Bot.Application.Common.Dto;
 using Bot.Application.Common.Interfaces;
-using Bot.Application.Common.Types;
 using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.GetTrackInfo;
@@ -11,15 +10,13 @@ namespace Bot.Application.Music.Commands.Common.GetTrackInfo;
 /// </summary>
 public class GetTrackInfoHandler : IRequestHandler<GetTrackInfoRequest, TrackInfoDto>
 {
-    private readonly IFactory<ITrackClient, TrackSource> _trackClientFactory;
-    private readonly ITrackSourceResolver _trackSourceResolver;
+    private readonly IFactory<ITrackClient, string> _trackClientFactory;
 
     /// <summary>
     /// Получение информации о треке.
     /// </summary>
-    public GetTrackInfoHandler(ITrackSourceResolver trackSourceResolver, IFactory<ITrackClient, TrackSource> trackClientFactory)
+    public GetTrackInfoHandler(IFactory<ITrackClient, string> trackClientFactory)
     {
-        _trackSourceResolver = trackSourceResolver;
         _trackClientFactory = trackClientFactory;
     }
 
@@ -33,9 +30,7 @@ public class GetTrackInfoHandler : IRequestHandler<GetTrackInfoRequest, TrackInf
         Guard.Against.Null(request, nameof(GetTrackInfoRequest));
         Guard.Against.NullOrWhiteSpace(request.Url, nameof(GetTrackInfoRequest.Url));
 
-        var source = _trackSourceResolver.GetTrackSource(request.Url);
-
-        ITrackClient trackClient = _trackClientFactory.Get(source);
+        ITrackClient trackClient = _trackClientFactory.Get(request.Url);
 
         var info = await trackClient.GetInfoAsync(request.Url);
 
