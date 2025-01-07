@@ -15,7 +15,7 @@ public static class Embed
             }
             .WithDescription($"""
                             ### Название: 
-                            "[{trackInfo.Title}]({trackInfo.Url})"
+                            [{trackInfo.Title}]({trackInfo.Url})
                             """)
             .AddField("Длительность", trackInfo.Duration?.ToString(@"hh\:mm\:ss") ?? "Неизвестна", inline: true)
             .WithThumbnail(trackInfo.ThumbnailUrl)

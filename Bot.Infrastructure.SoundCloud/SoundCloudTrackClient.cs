@@ -72,13 +72,8 @@ public class SoundCloudTrackClient : ITrackClient
 
         // Возвращаем поток
         var sourceStream = await audioStreamResponse.Content.ReadAsStreamAsync(cancellationToken);
-        var memoryStream = new MemoryStream();
-        await sourceStream.CopyToAsync(memoryStream, cancellationToken);
 
-        // Устанавливаем позицию на начало для последующего чтения
-        memoryStream.Position = 0;
-
-        return memoryStream;
+        return sourceStream;
     }
 
     public async Task<TrackInfoDto> GetInfoAsync(string url)
@@ -101,35 +96,48 @@ public class SoundCloudTrackClient : ITrackClient
         // Определяем тип ресурса
         var kind = json.RootElement.GetProperty("kind").GetString();
 
-        if (kind == "track")
+        switch (kind)
         {
-            // Если это одиночный трек, возвращаем массив с одной ссылкой
-            return [requestRequestText];
-        }
-        else if (kind == "playlist")
-        {
-            // Если это плейлист, извлекаем ссылки на все треки
-            var tracks = json.RootElement.GetProperty("tracks").EnumerateArray();
-            var trackIds = tracks
-                .Select(track => track.GetProperty("id").GetInt32())
-                .ToArray();
+            case "track":
+                // Если это одиночный трек, возвращаем массив с одной ссылкой
+                return [requestRequestText];
 
-            var trackUrls = new List<string>();
-
-            var trackUrlTasks = trackIds.Select(trackId => _httpClient.GetStringAsync($"https://api-v2.soundcloud.com/tracks/{trackId}?client_id={_clientId}")).ToList();
-
-            foreach (var trackUrlTask in trackUrlTasks)
+            case "playlist":
             {
-                json = JsonDocument.Parse(await trackUrlTask);
-                var trackUrl = json.RootElement.GetProperty("permalink_url").GetString();
+                // Если это плейлист, извлекаем ссылки на все треки
+                var tracks = json.RootElement.GetProperty("tracks").EnumerateArray();
 
-                trackUrls.Add(trackUrl!);
+                var links = new List<string>();
+                var notReadyIds = new List<int>();
+
+                foreach (var track in tracks)
+                {
+                    if (track.TryGetProperty("permalink_url", out var permalinkUrl))
+                    {
+                        links.Add(permalinkUrl.GetString()!);
+                    }
+                    else
+                    {
+                        notReadyIds.Add(track.GetProperty("id").GetInt32());
+                    }
+                }
+
+                var trackUrlTasks = notReadyIds.Select(trackId => _httpClient.GetStringAsync($"https://api-v2.soundcloud.com/tracks/{trackId}?client_id={_clientId}")).ToList();
+
+                foreach (var trackUrlTask in trackUrlTasks)
+                {
+                    json = JsonDocument.Parse(await trackUrlTask);
+                    var trackUrl = json.RootElement.GetProperty("permalink_url").GetString();
+
+                    links.Add(trackUrl!);
+                }
+
+                return links.ToArray();
             }
 
-            return trackUrls.ToArray();
+            default:
+                // Если формат неизвестен, бросаем исключение
+                throw new InvalidOperationException("Unsupported SoundCloud resource type.");
         }
-
-        // Если формат неизвестен, бросаем исключение
-        throw new InvalidOperationException("Unsupported SoundCloud resource type.");
     }
 }
