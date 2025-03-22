@@ -22,6 +22,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Bot.Infrastructure.SoundCloud\Bot.Infrastructure.SoundCloud.csproj" />
+      <ProjectReference Include="..\Bot.Infrastructure.YouTube\Bot.Infrastructure.YouTube.csproj" />
     </ItemGroup>
 
 </Project>

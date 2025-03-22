@@ -4,6 +4,7 @@ using Ardalis.GuardClauses;
 using Bot.Application.Common.Dto;
 using Bot.Application.Common.Interfaces;
 using Bot.Domain.Validation;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Bot.Infrastructure.YouTube;
@@ -15,11 +16,13 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
 {
     private const string SearchUrl = "https://www.googleapis.com/youtube/v3/search";
     private const string VideoInfoUrl = "https://www.googleapis.com/youtube/v3/videos";
+    private readonly ILogger<YouTubeTrackClient> _logger;
 
     private readonly YoutubeApiOptions _options;
 
-    public YouTubeTrackClient(IOptions<YoutubeApiOptions> options)
+    public YouTubeTrackClient(IOptions<YoutubeApiOptions> options, ILogger<YouTubeTrackClient> logger)
     {
+        _logger = logger;
         _options = Guard.Against.Null(options.Value, nameof(options.Value));
     }
 
@@ -37,7 +40,7 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
             FileName = _options.YtDlpPath,
-            Arguments = $"-f bestaudio --no-post-overwrites --cookies {cookiesPath} --quiet -o - {videoUrl}",
+            Arguments = $"-f bestaudio --no-post-overwrites --extractor-args \"youtube:player_client=tv\" --cookies {cookiesPath} --quiet -o - {videoUrl}",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -46,6 +49,15 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
 
         var process = Process.Start(startInfo);
         ThrowIf.Null(process, nameof(process));
+
+        _ = Task.Run(async () =>
+        {
+            using var errorReader = process!.StandardError;
+            while (await errorReader.ReadLineAsync(cancellationToken) is { } line)
+            {
+                _logger.LogError("YT-DLP Error: {ErrorLine}", line);
+            }
+        }, cancellationToken);
 
         return Task.FromResult(process!.StandardOutput.BaseStream);
     }
