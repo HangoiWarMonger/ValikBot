@@ -34,7 +34,7 @@ public sealed class BotService : IHostedService
     {
         _logger.LogInformation("Запускаем бота.");
         _logger.LogInformation("Токен бота - {DiscordToken}", _settings.Token);
-        _logger.LogInformation("Префикс - {DiscordToken}", _settings.Prefix);
+        _logger.LogInformation("Префикс - {DiscordPrefix}", _settings.Prefix);
 
         var config = new DiscordConfiguration
         {
