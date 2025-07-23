@@ -2,6 +2,9 @@ using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.SkipTrack;
 
+/// <summary>
+/// Запрос на пропуск текущего трека.
+/// </summary>
 public class SkipTrackRequest : IRequest
 {
     /// <summary>
@@ -9,6 +12,9 @@ public class SkipTrackRequest : IRequest
     /// </summary>
     public ulong GuildId { get; init; }
 
+    /// <summary>
+    /// Создаёт запрос на пропуск трека.
+    /// </summary>
     public SkipTrackRequest(ulong guildId)
     {
         GuildId = guildId;

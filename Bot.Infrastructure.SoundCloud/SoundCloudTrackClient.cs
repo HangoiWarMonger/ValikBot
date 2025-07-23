@@ -5,6 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace Bot.Infrastructure.SoundCloud;
 
+/// <summary>
+/// Клиент для работы с сервисом SoundCloud.
+/// </summary>
 public class SoundCloudTrackClient : ITrackClient
 {
     private const string ApiBaseUrl = "https://api-widget.soundcloud.com";
@@ -12,18 +15,27 @@ public class SoundCloudTrackClient : ITrackClient
     private readonly HttpClient _httpClient;
     private readonly string _clientId;
 
+    /// <summary>
+    /// Создание клиента SoundCloud с использованием настроек из конфигурации.
+    /// </summary>
     public SoundCloudTrackClient(HttpClient httpClient, IOptions<SoundCloudOptions> options)
     {
         _httpClient = httpClient;
         _clientId = options.Value.ClientId;
     }
 
+    /// <summary>
+    /// Создание клиента SoundCloud с явным указанием идентификатора клиента.
+    /// </summary>
     public SoundCloudTrackClient(HttpClient httpClient, string clientId)
     {
         _httpClient = httpClient;
         _clientId = clientId;
     }
 
+    /// <summary>
+    /// Получить полную информацию о треке из SoundCloud.
+    /// </summary>
     private async Task<JsonDocument> GetAllTrackInfo(string url, CancellationToken cancellationToken = default)
     {
         var infoUrl = $"{ApiBaseUrl}/resolve?url={url}&format=json&client_id={_clientId}";
@@ -32,6 +44,9 @@ public class SoundCloudTrackClient : ITrackClient
         return JsonDocument.Parse(response);
     }
 
+    /// <summary>
+    /// Получить аудиопоток по ссылке на трек.
+    /// </summary>
     public async Task<Stream> GetAudioStreamAsync(string videoUrl, CancellationToken cancellationToken = default)
     {
         var json = await GetAllTrackInfo(videoUrl, cancellationToken);
@@ -76,6 +91,9 @@ public class SoundCloudTrackClient : ITrackClient
         return sourceStream;
     }
 
+    /// <summary>
+    /// Получить информацию о треке.
+    /// </summary>
     public async Task<TrackInfoDto> GetInfoAsync(string url)
     {
         var json = await GetAllTrackInfo(url);
@@ -89,6 +107,9 @@ public class SoundCloudTrackClient : ITrackClient
         };
     }
 
+    /// <summary>
+    /// Получить список треков по ссылке или плейлисту.
+    /// </summary>
     public async Task<string[]> GetTracksFromLink(string requestRequestText)
     {
         var json = await GetAllTrackInfo(requestRequestText);

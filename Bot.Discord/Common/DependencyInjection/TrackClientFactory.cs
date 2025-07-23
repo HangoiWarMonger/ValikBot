@@ -6,17 +6,26 @@ using Bot.Infrastructure.YouTube;
 
 namespace Bot.Discord.Common.DependencyInjection;
 
+/// <summary>
+/// Фабрика получения клиента треков по ссылке.
+/// </summary>
 public partial class TrackClientFactory : IFactory<ITrackClient, string>
 {
     private readonly YouTubeTrackClient _youTubeTrackClient;
     private readonly SoundCloudTrackClient _soundCloudTrackClient;
 
+    /// <summary>
+    /// Создаёт фабрику клиентов.
+    /// </summary>
     public TrackClientFactory(YouTubeTrackClient youTubeTrackClient, SoundCloudTrackClient soundCloudTrackClient)
     {
         _youTubeTrackClient = youTubeTrackClient;
         _soundCloudTrackClient = soundCloudTrackClient;
     }
 
+    /// <summary>
+    /// Получить клиент по ссылке.
+    /// </summary>
     public ITrackClient Get(string key)
     {
         var source = GetSource(key);
@@ -31,6 +40,9 @@ public partial class TrackClientFactory : IFactory<ITrackClient, string>
         return service;
     }
 
+    /// <summary>
+    /// Определить источник трека по ссылке.
+    /// </summary>
     private static TrackSources GetSource(string key)
     {
         if (YouTubeRegex().IsMatch(key))

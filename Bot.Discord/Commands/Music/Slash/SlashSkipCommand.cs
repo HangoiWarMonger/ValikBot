@@ -63,6 +63,9 @@ public class SlashSkipCommand : ApplicationCommandModule
         await _sender.Send(skip);
     }
 
+    /// <summary>
+    /// Возвращает голосовой канал пользователя.
+    /// </summary>
     private DiscordChannel? GetVoiceChannel(DiscordMember? member)
     {
         return member?.VoiceState?.Channel;

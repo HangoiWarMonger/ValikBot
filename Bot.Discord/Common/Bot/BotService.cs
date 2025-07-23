@@ -14,6 +14,9 @@ using Microsoft.Extensions.Options;
 
 namespace Bot.Discord.Common.Bot;
 
+/// <summary>
+/// Сервис инициализации и управления Discord‑ботом.
+/// </summary>
 public sealed class BotService : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
@@ -22,6 +25,9 @@ public sealed class BotService : IHostedService
     private readonly ComponentService _componentService;
     private DiscordClient _client;
 
+    /// <summary>
+    /// Создаёт экземпляр сервиса.
+    /// </summary>
     public BotService(IServiceProvider serviceProvider, IOptions<BotSettings> settings, ILogger<BotService> logger, ComponentService componentService)
     {
         _serviceProvider = serviceProvider;
@@ -30,6 +36,9 @@ public sealed class BotService : IHostedService
         _settings = settings.Value;
     }
 
+    /// <summary>
+    /// Запуск бота.
+    /// </summary>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Запускаем бота.");
@@ -121,6 +130,9 @@ public sealed class BotService : IHostedService
         _logger.LogInformation("Успешное подключение...");
     }
 
+    /// <summary>
+    /// Остановка бота.
+    /// </summary>
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Завершение работы...");

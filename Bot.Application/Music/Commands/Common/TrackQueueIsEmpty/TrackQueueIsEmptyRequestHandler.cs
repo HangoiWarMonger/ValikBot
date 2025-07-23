@@ -5,15 +5,24 @@ using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.TrackQueueIsEmpty;
 
+/// <summary>
+/// Обработчик запроса проверки очереди треков.
+/// </summary>
 public class TrackQueueIsEmptyRequestHandler : IRequestHandler<TrackQueueIsEmptyRequest, bool>
 {
     private IFactory<TrackQueue, ulong> _trackQueueFactory;
 
+    /// <summary>
+    /// Создаёт обработчик.
+    /// </summary>
     public TrackQueueIsEmptyRequestHandler(IFactory<TrackQueue, ulong> trackQueueFactory)
     {
         _trackQueueFactory = trackQueueFactory;
     }
 
+    /// <summary>
+    /// Обработка запроса.
+    /// </summary>
     public Task<bool> Handle(TrackQueueIsEmptyRequest request, CancellationToken cancellationToken)
     {
         Guard.Against.Null(request, nameof(request));

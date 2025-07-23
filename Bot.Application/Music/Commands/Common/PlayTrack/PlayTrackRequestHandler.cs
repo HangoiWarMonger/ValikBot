@@ -6,6 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Bot.Application.Music.Commands.Common.PlayTrack;
 
+/// <summary>
+/// Обработчик запроса воспроизведения треков.
+/// </summary>
 public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
 {
     private readonly IFactory<TrackQueue, ulong> _trackQueueFactory;
@@ -14,6 +17,9 @@ public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
     private readonly IPcmAudioConverter _pcmAudioConverter;
     private TrackQueue _trackQueue;
 
+    /// <summary>
+    /// Создаёт обработчик.
+    /// </summary>
     public PlayTrackRequestHandler(IFactory<TrackQueue, ulong> trackQueueFactory, IPcmAudioConverter pcmAudioConverter, ILogger<PlayTrackRequestHandler> logger, IFactory<ITrackClient, string> trackClientFactory)
     {
         _trackQueueFactory = trackQueueFactory;
@@ -22,6 +28,9 @@ public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
         _trackClientFactory = trackClientFactory;
     }
 
+    /// <summary>
+    /// Обрабатывает запрос.
+    /// </summary>
     public async Task Handle(PlayTrackRequest request, CancellationToken cancellationToken)
     {
         Guard.Against.Null(request.RestreamAction, nameof(request.RestreamAction));
@@ -40,6 +49,9 @@ public class PlayTrackRequestHandler : IRequestHandler<PlayTrackRequest>
         }
     }
 
+    /// <summary>
+    /// Проигрывает следующий трек из очереди.
+    /// </summary>
     private async Task PlayNextInQueue(Func<Stream, CancellationToken, Task> restreamAction, Func<Task> endStreamAction, Func<MusicTrack, Task> onNewTrackAction)
     {
         _logger.LogDebug("Пробуем запустить следующий трек...");

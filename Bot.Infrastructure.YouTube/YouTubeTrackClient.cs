@@ -180,6 +180,9 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
         }
     }
 
+    /// <summary>
+    /// Извлекает идентификатор плейлиста из ссылки.
+    /// </summary>
     private string? ExtractPlaylistIdFromUrl(string url)
     {
         var uri = new Uri(url);
@@ -187,6 +190,9 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
         return query["list"];
     }
 
+    /// <summary>
+    /// Извлекает идентификатор видео из ссылки.
+    /// </summary>
     private string? ExtractVideoIdFromUrl(string url)
     {
         var uri = new Uri(url);
@@ -194,6 +200,9 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
         return query["v"];
     }
 
+    /// <summary>
+    /// Парсит длительность в формате ISO 8601.
+    /// </summary>
     private TimeSpan ParseIso8601Duration(string iso8601Duration)
     {
         return System.Xml.XmlConvert.ToTimeSpan(iso8601Duration);
