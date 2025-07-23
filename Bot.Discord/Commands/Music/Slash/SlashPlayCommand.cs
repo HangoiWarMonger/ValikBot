@@ -102,6 +102,9 @@ public class SlashPlayCommand : ApplicationCommandModule
                 }));
     }
 
+    /// <summary>
+    /// Возвращает голосовой канал пользователя.
+    /// </summary>
     private DiscordChannel? GetVoiceChannel(DiscordMember? member)
     {
         return member?.VoiceState?.Channel;

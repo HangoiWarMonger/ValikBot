@@ -5,17 +5,26 @@ using MediatR;
 
 namespace Bot.Application.Music.Commands.Common.GetUrlFromTextRequest;
 
+/// <summary>
+/// Обработчик получения ссылок из текста запроса.
+/// </summary>
 public class GetUrlFromTextHandler : IRequestHandler<GetUrlFromTextRequest, string[]>
 {
     private readonly IFactory<ITrackClient, string> _trackClientFactory;
     private readonly ISearchService _searchService;
 
+    /// <summary>
+    /// Создаёт обработчик.
+    /// </summary>
     public GetUrlFromTextHandler(ISearchService searchService, IFactory<ITrackClient, string> trackClientFactory)
     {
         _searchService = searchService;
         _trackClientFactory = trackClientFactory;
     }
 
+    /// <summary>
+    /// Выполняет обработку запроса.
+    /// </summary>
     public async Task<string[]> Handle(GetUrlFromTextRequest request, CancellationToken cancellationToken)
     {
         Guard.Against.Null(request, nameof(request));

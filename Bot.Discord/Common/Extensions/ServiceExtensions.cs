@@ -8,8 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bot.Discord.Common.Extensions;
 
+/// <summary>
+/// Методы расширения для регистрации зависимостей.
+/// </summary>
 public static class ServiceExtensions
 {
+    /// <summary>
+    /// Регистрирует клиента SoundCloud.
+    /// </summary>
     public static IServiceCollection AddSoundCloudTrackClient(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<HttpClient>();
@@ -27,6 +33,9 @@ public static class ServiceExtensions
         return services;
     }
 
+    /// <summary>
+    /// Регистрирует клиента YouTube.
+    /// </summary>
     public static IServiceCollection AddYouTubeTrackClient(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<YoutubeApiOptions>(apiOptions =>
@@ -43,6 +52,9 @@ public static class ServiceExtensions
         return services;
     }
 
+    /// <summary>
+    /// Регистрирует ffmpeg и связанные сервисы.
+    /// </summary>
     public static IServiceCollection AddFfmpeg(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<FfmpegOptions>(options =>
