@@ -11,7 +11,7 @@ public class TrackClientFactoryTests
     [Fact]
     public void Get_ReturnsYouTubeClient_ForYouTubeUrl()
     {
-        var ytClient = new YouTubeTrackClient(Microsoft.Extensions.Options.Options.Create(new YoutubeApiOptions{ApiKey="key"}), Microsoft.Extensions.Logging.Abstractions.NullLogger<YouTubeTrackClient>.Instance);
+        var ytClient = new YouTubeTrackClient(new HttpClient(), Microsoft.Extensions.Options.Options.Create(new YoutubeApiOptions{ApiKey="key"}), Microsoft.Extensions.Logging.Abstractions.NullLogger<YouTubeTrackClient>.Instance);
         var scClient = new SoundCloudTrackClient(new HttpClient(), "id");
         var factory = new TrackClientFactory(ytClient, scClient);
 
@@ -23,7 +23,7 @@ public class TrackClientFactoryTests
     [Fact]
     public void Get_Throws_For_UnsupportedUrl()
     {
-        var ytClient = new YouTubeTrackClient(Microsoft.Extensions.Options.Options.Create(new YoutubeApiOptions{ApiKey="key"}), Microsoft.Extensions.Logging.Abstractions.NullLogger<YouTubeTrackClient>.Instance);
+        var ytClient = new YouTubeTrackClient(new HttpClient(), Microsoft.Extensions.Options.Options.Create(new YoutubeApiOptions{ApiKey="key"}), Microsoft.Extensions.Logging.Abstractions.NullLogger<YouTubeTrackClient>.Instance);
         var scClient = new SoundCloudTrackClient(new HttpClient(), "id");
         var factory = new TrackClientFactory(ytClient, scClient);
 
@@ -32,7 +32,7 @@ public class TrackClientFactoryTests
     [Fact]
     public void Get_ReturnsSoundCloudClient_ForSoundCloudUrl()
     {
-        var ytClient = new YouTubeTrackClient(Microsoft.Extensions.Options.Options.Create(new YoutubeApiOptions{ApiKey="key"}), Microsoft.Extensions.Logging.Abstractions.NullLogger<YouTubeTrackClient>.Instance);
+        var ytClient = new YouTubeTrackClient(new HttpClient(), Microsoft.Extensions.Options.Options.Create(new YoutubeApiOptions{ApiKey="key"}), Microsoft.Extensions.Logging.Abstractions.NullLogger<YouTubeTrackClient>.Instance);
         var scClient = new SoundCloudTrackClient(new HttpClient(), "id");
         var factory = new TrackClientFactory(ytClient, scClient);
 
