@@ -42,6 +42,10 @@ public static class ServiceExtensions
             {
                 configuration.Bind(YoutubeApiOptions.SectionName, apiOptions);
                 apiOptions.YtDlpPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "yt-dlp");
+                if (string.IsNullOrWhiteSpace(apiOptions.CookiesPath))
+                {
+                    apiOptions.CookiesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.txt");
+                }
 
                 ThrowIf.Null(apiOptions, nameof(apiOptions));
                 ThrowIf.NullOrWhiteSpace(apiOptions.ApiKey, nameof(apiOptions.ApiKey));

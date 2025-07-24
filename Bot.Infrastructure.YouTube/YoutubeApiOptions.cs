@@ -19,4 +19,14 @@ public class YoutubeApiOptions
     /// Путь к утилите yt-dlp.
     /// </summary>
     public string YtDlpPath { get; set; } = null!;
+
+    /// <summary>
+    /// Дополнительные аргументы yt-dlp, не включающие путь к cookies и ссылку на видео.
+    /// </summary>
+    public string YtDlpArgs { get; set; } = "-f bestaudio --no-post-overwrites --extractor-args \"youtube:player_client=tv\"";
+
+    /// <summary>
+    /// Путь к файлу cookies.
+    /// </summary>
+    public string CookiesPath { get; set; } = "cookies.txt";
 }
