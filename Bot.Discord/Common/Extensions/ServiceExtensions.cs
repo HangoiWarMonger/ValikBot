@@ -18,8 +18,6 @@ public static class ServiceExtensions
     /// </summary>
     public static IServiceCollection AddSoundCloudTrackClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<HttpClient>();
-
         services
             .Configure<SoundCloudOptions>(options =>
             {
@@ -27,6 +25,9 @@ public static class ServiceExtensions
 
                 ThrowIf.NullOrWhiteSpace(options.ClientId, nameof(options.ClientId));
             })
+            .AddHttpClient<SoundCloudTrackClient>();
+
+        services
             .AddTransient<ITrackClient, SoundCloudTrackClient>()
             .AddTransient<SoundCloudTrackClient>();
 
@@ -46,6 +47,9 @@ public static class ServiceExtensions
                 ThrowIf.Null(apiOptions, nameof(apiOptions));
                 ThrowIf.NullOrWhiteSpace(apiOptions.ApiKey, nameof(apiOptions.ApiKey));
             })
+            .AddHttpClient<YouTubeTrackClient>();
+
+        services
             .AddTransient<ITrackClient, YouTubeTrackClient>()
             .AddTransient<YouTubeTrackClient>();
 

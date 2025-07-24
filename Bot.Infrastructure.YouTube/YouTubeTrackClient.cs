@@ -17,11 +17,13 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
     private const string SearchUrl = "https://www.googleapis.com/youtube/v3/search";
     private const string VideoInfoUrl = "https://www.googleapis.com/youtube/v3/videos";
     private readonly ILogger<YouTubeTrackClient> _logger;
+    private readonly HttpClient _httpClient;
 
     private readonly YoutubeApiOptions _options;
 
-    public YouTubeTrackClient(IOptions<YoutubeApiOptions> options, ILogger<YouTubeTrackClient> logger)
+    public YouTubeTrackClient(HttpClient httpClient, IOptions<YoutubeApiOptions> options, ILogger<YouTubeTrackClient> logger)
     {
+        _httpClient = httpClient;
         _logger = logger;
         _options = Guard.Against.Null(options.Value, nameof(options.Value));
     }
@@ -74,10 +76,9 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
         var videoId = ExtractVideoIdFromUrl(url);
         ThrowIf.NullOrWhiteSpace(videoId, nameof(videoId));
 
-        using var httpClient = new HttpClient();
         var requestUrl = $"{VideoInfoUrl}?id={videoId}&part=snippet,contentDetails&key={_options.ApiKey}";
 
-        var response = await httpClient.GetStringAsync(requestUrl);
+        var response = await _httpClient.GetStringAsync(requestUrl);
         using var jsonDoc = JsonDocument.Parse(response);
 
         var items = jsonDoc.RootElement.GetProperty("items");
@@ -109,10 +110,9 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
     {
         Guard.Against.NullOrWhiteSpace(request, nameof(request));
 
-        using var httpClient = new HttpClient();
         var url = $"{SearchUrl}?part=snippet&maxResults=1&type=video&q={Uri.EscapeDataString(request)}&key={_options.ApiKey}";
 
-        var response = await httpClient.GetAsync(url, cancellationToken);
+        var response = await _httpClient.GetAsync(url, cancellationToken);
 
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
         var items = doc.RootElement.GetProperty("items");
@@ -151,10 +151,9 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
             var playlistId = ExtractPlaylistIdFromUrl(requestRequestText);
             ThrowIf.NullOrWhiteSpace(playlistId, nameof(playlistId));
 
-            using var httpClient = new HttpClient();
             var url = $"https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId={playlistId}&key={_options.ApiKey}";
 
-            var response = await httpClient.GetStringAsync(url);
+            var response = await _httpClient.GetStringAsync(url);
             using var jsonDoc = JsonDocument.Parse(response);
 
             var items = jsonDoc.RootElement.GetProperty("items");
