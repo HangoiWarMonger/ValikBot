@@ -19,4 +19,14 @@ public class YoutubeApiOptions
     /// Путь к утилите yt-dlp.
     /// </summary>
     public string YtDlpPath { get; set; } = null!;
+
+    /// <summary>
+    /// Логин от аккаунта YouTube.
+    /// </summary>
+    public string Login { get; set; } = null!;
+
+    /// <summary>
+    /// Пароль от аккаунта YouTube.
+    /// </summary>
+    public string Password { get; set; } = null!;
 }

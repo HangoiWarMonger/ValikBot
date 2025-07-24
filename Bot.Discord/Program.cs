@@ -61,6 +61,7 @@ await Host.CreateDefaultBuilder()
                 var guildTrackQueueFactory = provider.GetRequiredService<GuildTrackQueueFactory>();
                 return guildTrackQueueFactory;
             })
+            .AddHostedService<YouTubeCookieUpdater>()
             .AddHostedService<BotService>();
     })
     .RunConsoleAsync();
