@@ -1,5 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# 
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B116789C-3F05-4906-A264-57D82FD18460}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{BD0B5496-C473-4574-AE61-695168D94F94}"
@@ -25,6 +26,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BA64D00E-24A1-4866-B240-EE7258DFBAF5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot.Infrastructure.SoundCloud", "Bot.Infrastructure.SoundCloud\Bot.Infrastructure.SoundCloud.csproj", "{D812337F-29B1-4B75-94F3-391C8EDECE75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot.Tests", "Bot.Tests\Bot.Tests.csproj", "{85456FB8-564D-4FEA-9767-63C2FEFEBD1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +59,10 @@ Global
 		{D812337F-29B1-4B75-94F3-391C8EDECE75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D812337F-29B1-4B75-94F3-391C8EDECE75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D812337F-29B1-4B75-94F3-391C8EDECE75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85456FB8-564D-4FEA-9767-63C2FEFEBD1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85456FB8-564D-4FEA-9767-63C2FEFEBD1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85456FB8-564D-4FEA-9767-63C2FEFEBD1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85456FB8-564D-4FEA-9767-63C2FEFEBD1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BD0B5496-C473-4574-AE61-695168D94F94} = {B116789C-3F05-4906-A264-57D82FD18460}
