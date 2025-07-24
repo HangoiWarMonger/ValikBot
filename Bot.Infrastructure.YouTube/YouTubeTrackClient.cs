@@ -35,12 +35,14 @@ public class YouTubeTrackClient : ITrackClient, ISearchService
     {
         Guard.Against.NullOrWhiteSpace(videoUrl);
 
-        var cookiesPath = "cookies.txt";
+        var cookiesPath = _options.CookiesPath;
+
+        var arguments = $"{_options.YtDlpArgs} --cookies {cookiesPath} --quiet -o - {videoUrl}";
 
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
             FileName = _options.YtDlpPath,
-            Arguments = $"-f bestaudio --no-post-overwrites --extractor-args \"youtube:player_client=tv\" --cookies {cookiesPath} --quiet -o - {videoUrl}",
+            Arguments = arguments,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
